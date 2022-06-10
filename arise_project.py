@@ -45,6 +45,10 @@ import pandas as pd
 import re
 # from datetime import timedelta 
 
+from matplotlib import pyplot as plt
+import numpy as np
+
+
 from bson.objectid import ObjectId
 import dateutil.parser
 import pymongo
@@ -89,8 +93,89 @@ def clearFrame():
     # this will clear frame and frame will be empty
     # if you want to hide the empty panel then
     MidViewForm9.pack_forget()
+    
+#===========================================Report Frame=================================================
+def report_piechart_members_Data():
+    """
+    this function is to test pie chart
+
+    """
+    dataSearch = db['church_ministry']
+    search_data = dataSearch.find()
+   
+         
+    subtitle=[]
+    
+    for value in search_data:
+        subtitle.append(value['ministry'])
+
+    dataSearch2 = db['church_ministry']
+    search_data2 = dataSearch2.find()
+
+    a = ''
+    
+    subtitle2=[]
+    for i in search_data2:
+        a = i['ministry']
+        
+
+        dataSearch3 = db['members_detail']
+
+        search_data3= dataSearch3.count_documents({'ministry':a})
+        subtitle2.append(search_data3)
+    
+    # Creating dataset
+    # cars = ['AUDI', 'BMW', 'FORD',
+    #         'TESLA', 'JAGUAR', 'MERCEDES']
+
+    cars = subtitle
+    
+    data = subtitle2
+
+
+    
+    # Creating explode data
+    explode = (0.1, 0.0)
+    
+    # Creating color parameters
+    colors = ( "orange", "cyan","blue","yellow")
+    
+    # Wedge properties
+    wp = { 'linewidth' : 1, 'edgecolor' : "green" }
+    
+    # Creating autocpt arguments
+    def func(pct, allvalues):
+        absolute = int(pct / 100.*np.sum(allvalues))
+        return "{:.1f}%\n({:d} g)".format(pct, absolute)
+    
+    # Creating plot
+    fig, ax = plt.subplots(figsize =(10, 7))
+    wedges, texts, autotexts = ax.pie(data,
+                                    autopct = lambda pct: func(pct, data),
+                                    
+                                    labels = cars,
+                                    shadow = True,
+                                    colors = colors,
+                                    startangle = 90,
+                                    wedgeprops = wp,
+                                    textprops = dict(color ="magenta"))
+    
+    # Adding legend
+    ax.legend(wedges, cars,
+            title ="Ministry",
+            loc ="center left",
+            bbox_to_anchor =(1, 0, 0.5, 1))
+    
+    plt.setp(autotexts, size = 11, weight ="bold")
+    ax.set_title("Arise Church Member's Data Chart")
+    
+    # show plot
+    plt.show()
+
 
 #===========================================Attendance Frame=====================================
+
+
 def insert_members_detail():
     global payCal_date
     payCal_date_label = Label(members_data_frame, text='Date:', width=10, height=1, bg='yellow', fg='gray',
@@ -112,6 +197,17 @@ def insert_members_detail():
     btn_search = Button(members_data_frame, text='SEARCH', bd=2, bg='blue', fg='white',
                               font=('arial', 10), width=10, height=1)
     btn_search.place(x=300, y=35)
+    
+    
+def memberList_function():
+    
+    """
+    this function is for
+    calling the Members List
+    """
+    
+    membersList_treeview.delete(*membersList_treeview.get_children())
+    return members_list()
 
 def members_list():
     """
@@ -119,18 +215,32 @@ def members_list():
     """
 
     dataSearch = db['members_detail']
-    search_data = dataSearch.find().sort('lname', 1)
+    search_data = dataSearch.find().sort('lname', pymongo.ASCENDING)
 
     members ={}
+    count = 0
     for row in search_data:
-        members.update({row['_id']:
-        {
+        count+=1
+        # mem_id = row['members_id']
+        # Lname = row['lname']
+        # fname = row['fname']
+        # ministry_tr = row['ministry']
+       
+        
+        data = {
             'members_id': row['members_id'],
             'lname': row['lname'],
             'fname': row['fname'],
             'ministry': row['ministry'],
+            'contact_num': row['contact_num'],
+            'count': count,
         }
-        })
+        
+        members.update(data)
+        
+        membersList_treeview.insert('', 'end', values=(members['count'],members['members_id'],members['lname'],
+                                members['fname'],members['ministry'],
+                                members['contact_num']))
 
 
 
@@ -176,11 +286,13 @@ def insert_mebers_details():
     try:
         collection.insert_one(dataInsert)
         messagebox.showinfo('JRS', 'Data has been save')
+        memberList_function()
         last_name_member_reg.delete(0, END)
         first_name_member_reg.delete(0, END)
         age_member_reg.delete(0, END)
         ministry_reg_entry.delete(0, END)
         contact_member_reg.delete(0, END)
+        add_reg_entry.delete('1.0', 'end-1c')
         
     except Exception as ex:
                 print("Error", f"Error due to :{str(ex)}")
@@ -217,10 +329,17 @@ def membersData_frame():
     """
     This is for members Data Frame
     """
+    
     global members_data_frame
+    
 
     members_data_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
     members_data_frame.place(x=20, y=8)
+    
+    trans_label = Label(members_data_frame, text='Inserting Church Member',
+                        width=35, height=1, bg='pink', fg='black',
+                          font=('Arial', 13), anchor='center')
+    trans_label.place(x=230, y=3)
 
     l_name_reg_label = Label(members_data_frame, text='Last Name:', width=10, height=1, bg='yellow', fg='black',
                           font=('Arial', 10), anchor='e')
@@ -296,13 +415,13 @@ def membersData_frame():
 
 
     memberslist_view_Form = Frame(members_data_frame, width=500, height=10)
-    memberslist_view_Form.place(x=350, y=30)
+    memberslist_view_Form.place(x=330, y=30)
 
     style = ttk.Style(members_data_frame)
     style.theme_use("clam")
     style.configure("Treeview",
                     background="black",
-                    foreground="white",
+                    foreground="cyan",
                     rowheight=15,
                     fieldbackground="yellow")
    
@@ -313,29 +432,33 @@ def membersData_frame():
     scrollbary = Scrollbar(memberslist_view_Form, orient=VERTICAL)
     
     membersList_treeview = ttk.Treeview(memberslist_view_Form,
-                                             columns=('ID','LNAME', "FNAME","MINISTRY",
-                                              ),
+                                             columns=('Count','ID','LNAME', "FNAME","MINISTRY",
+                                              'CONTACT'),
                                              selectmode="extended", height=20, yscrollcommand=scrollbary.set,
                                              xscrollcommand=scrollbarx.set)
     scrollbary.config(command=membersList_treeview.yview)
     scrollbary.pack(side=RIGHT, fill=Y)
     scrollbarx.config(command=membersList_treeview.xview)
     scrollbarx.pack(side=BOTTOM, fill=X)
+    membersList_treeview.heading('Count', text="Count", anchor=CENTER)
     membersList_treeview.heading('ID', text="ID", anchor=CENTER)
     membersList_treeview.heading('LNAME', text="Last Name", anchor=CENTER)
     membersList_treeview.heading('FNAME', text="First Name", anchor=CENTER)
     membersList_treeview.heading('MINISTRY', text="Ministry", anchor=CENTER)
-    
+    membersList_treeview.heading('CONTACT', text="Contact No.", anchor=CENTER)
 
 
     membersList_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
-    membersList_treeview.column('#1', stretch=NO, minwidth=0, width=100, anchor='e')
+    membersList_treeview.column('#1', stretch=NO, minwidth=0, width=70, anchor='e')
     membersList_treeview.column('#2', stretch=NO, minwidth=0, width=100, anchor='e')
     membersList_treeview.column('#3', stretch=NO, minwidth=0, width=100, anchor='e')
     membersList_treeview.column('#4', stretch=NO, minwidth=0, width=100, anchor='e')
+    membersList_treeview.column('#5', stretch=NO, minwidth=0, width=100, anchor='e')
+    membersList_treeview.column('#6', stretch=NO, minwidth=0, width=100, anchor='e')
 
     membersList_treeview.pack()
   
+    memberList_function()
 
 #===========================================User Registration Frame====================================
 def insert_user_registration():
@@ -487,7 +610,7 @@ def dashboard():
    
    
     filemenu3.add_command(label="Member Registration",command=membersData_frame)
-   
+    filemenu5.add_command(label="Data per Ministry",command=report_piechart_members_Data)
     
     menubar.add_cascade(label="Account", menu=filemenu)
     menubar.add_cascade(label="User Approval", menu=filemenu2)

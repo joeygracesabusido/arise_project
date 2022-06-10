@@ -40,12 +40,12 @@ def log_in():
     dataSearch = db['admin_login']
 
             
-    query = {'userName': userName, 'Password':pwinput.pwinput()}
+    query = {'username': userName, 'password':pwinput.pwinput()}
     agg_result = dataSearch.find(query)
     
     a = ''
     for x in agg_result:
-        a = x['userName']
+        a = x['username']
         return selection()
     
    
@@ -132,8 +132,15 @@ def absent_member():
 
         # for i in subtitle2:
         #     print(i)
+        
+    lst_of_lst = []
+    for i in subtitle2:
+        spl = i.split(',')
+        lst_of_lst.append(spl)
+
+    print(tabulate(lst_of_lst, headers =['Name',], tablefmt='psql'))
             
-    print(*subtitle2,sep = "\n")
+    # print(*subtitle2,sep = "\n")
 
 def attendance_list():
     """
@@ -655,11 +662,11 @@ def testing_array():
 
 
 
-testing_array()
+# testing_array()
 # call_array()
 # testing_piechart()
 # testing()
 # insert_login_()
-# log_in()
+log_in()
 # list_ministry()
 # church_ministry()
