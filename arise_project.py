@@ -172,7 +172,6 @@ def report_piechart_members_Data():
     # show plot
     plt.show()
 
-
 #===========================================Attendance Frame=====================================
 def insert_attendance():
     """
