@@ -174,29 +174,196 @@ def report_piechart_members_Data():
 
 
 #===========================================Attendance Frame=====================================
+def insert_attendance():
+    """
+    This function is to insert attendance
+    """
+    
+    collection = db['attendance']
 
+    dataInsert = {
+        'members_id': members_ID_time.get(),
+        'lname': last_name_member_reg_time.get(),
+        'fname': first_name_member_reg_time.get(),
+        'ministry':ministry_reg_entry_time.get(),
+        'created':datetime.now()
+        
+    }
+    
+    try:
+        collection.insert_one(dataInsert)
+        
+        messagebox.showinfo('JRS','Your Attendance Has been Save')
+        last_name_member_reg_time.delete(0, END)
+        first_name_member_reg_time.delete(0, END)
+        ministry_reg_entry_time.delete(0, END)
+        members_ID_time.delete(0, END)
+       
+        
+        
+    except Exception as ex:
+         messagebox.showerror("Error", f"Error due to :{str(ex)}") 
+                
+def search_member_timeIn_fname():
+    """
+    This function is for searching 
+    members tru first name
+    """
+    dataSearch = db['members_detail']
+    search_data = dataSearch.find({'fname':{'$regex':first_name_member_reg_time.get()}})
+    
+    for i in search_data:
+        member_id = i['members_id']
+        l_name_search = i['lname']
+        f_name_search = i['fname']
+        ministry_search = i['ministry']
+        
+        last_name_member_reg_time.delete(0, END)
+        last_name_member_reg_time.insert(0, (l_name_search))
+    
+        first_name_member_reg_time.delete(0, END)
+        first_name_member_reg_time.insert(0, (f_name_search))
+        
+        ministry_reg_entry_time.delete(0, END)
+        ministry_reg_entry_time.insert(0, (ministry_search))
+        
+        members_ID_time.delete(0, END)
+        members_ID_time.insert(0, (member_id))
+        
+def search_member_timeIn():
+    """
+    This function is for searching 
+    members tru ID number
+    """
+    dataSearch = db['members_detail']
+    search_data = dataSearch.find({'members_id':{'$regex':members_ID_time.get()}})
+    
+    for i in search_data:
+        member_id = i['members_id']
+        l_name_search = i['lname']
+        f_name_search = i['fname']
+        ministry_search = i['ministry']
+        
+        last_name_member_reg_time.delete(0, END)
+        last_name_member_reg_time.insert(0, (l_name_search))
+    
+        first_name_member_reg_time.delete(0, END)
+        first_name_member_reg_time.insert(0, (f_name_search))
+        
+        ministry_reg_entry_time.delete(0, END)
+        ministry_reg_entry_time.insert(0, (ministry_search))
+        
+        members_ID_time.delete(0, END)
+        members_ID_time.insert(0, (member_id))
 
-def insert_members_detail():
-    global payCal_date
-    payCal_date_label = Label(members_data_frame, text='Date:', width=10, height=1, bg='yellow', fg='gray',
+def time_in_attendace():
+    """
+    This function is for 
+    attendance Frame
+    """
+    members_attendance_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
+    members_attendance_frame.place(x=20, y=8)
+    
+    trans_label = Label(members_attendance_frame, text='Attendance for Church Member',
+                        width=35, height=1, bg='pink', fg='black',
+                          font=('Arial', 15), anchor='center')
+    trans_label.place(x=230, y=2)
+    
+    
+    l_name_reg_label_time = Label(members_attendance_frame, text='ID Number:', width=10, height=1, bg='yellow', fg='black',
                           font=('Arial', 10), anchor='e')
-    payCal_date_label.place(x=10, y=35)
+    l_name_reg_label_time.place(x=10, y=55)
 
-    payCal_date = DateEntry(members_data_frame, width=15, background='darkblue', date_pattern='yyyy-MM-dd',
-                                  foreground='white', borderwidth=2, padx=10, pady=10)
-    payCal_date.place(x=120, y=35)
-    payCal_date.configure(justify='center')
+    global members_ID_time
+    members_ID_time = Entry(members_attendance_frame, width=15, font=('Arial', 12))
+    members_ID_time.place(x=110, y=55)
+
+    l_name_reg_label_time = Label(members_attendance_frame, text='Last Name:', width=10, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    l_name_reg_label_time.place(x=10, y=85)
+
+    global last_name_member_reg_time
+    last_name_member_reg_time = Entry(members_attendance_frame, width=15, font=('Arial', 12))
+    last_name_member_reg_time.place(x=110, y=85)
+
+    f_name_reg_label_time = Label(members_attendance_frame, text='First Name:', width=10, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    f_name_reg_label_time.place(x=10, y=115)
+
+    global first_name_member_reg_time
+    first_name_member_reg_time = Entry(members_attendance_frame, width=15, font=('Arial', 12))
+    first_name_member_reg_time.place(x=110, y=115)
+
+    age_reg_label = Label(members_attendance_frame, text='Ministry:', width=10, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    age_reg_label.place(x=10, y=145)
+
+    global ministry_reg_entry_time
+    ministry_reg_entry_time = ttk.Combobox(members_attendance_frame, width=20,font=('Arial', 12))
+    ministry_reg_entry_time['values'] = ministry_list()
+    ministry_reg_entry_time.place(x=110, y=145)
+
+   
+    btn_search = Button(members_attendance_frame, text='Search', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=7, height=1,command=search_member_timeIn)
+    btn_search.place(x=250, y=55)
+    
+    btn_search_fname = Button(members_attendance_frame, text='Search', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=7, height=1,command=search_member_timeIn_fname)
+    btn_search_fname.place(x=250, y=115)
+   
+    
+    btn_save = Button(members_attendance_frame, text='Save', bd=2, bg='green', fg='white',
+                              font=('arial', 10), width=10, height=1,command=insert_attendance)
+    btn_save.place(x=10, y=185)
+
+
+    memberslist_view_Form = Frame(members_attendance_frame, width=500, height=10)
+    memberslist_view_Form.place(x=330, y=30)
+
+    style = ttk.Style(members_attendance_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="black",
+                    foreground="cyan",
+                    rowheight=15,
+                    fieldbackground="yellow")
+   
     
     
-    btn_import = Button(members_data_frame, text='Import Data', bd=2, bg='yellow', fg='black',
-                              font=('arial', 10), width=10, height=1)
-    btn_import.place(x=10, y=70)
+    global membersList_treeview
+    scrollbarx = Scrollbar(memberslist_view_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(memberslist_view_Form, orient=VERTICAL)
     
-    
-    
-    btn_search = Button(members_data_frame, text='SEARCH', bd=2, bg='blue', fg='white',
-                              font=('arial', 10), width=10, height=1)
-    btn_search.place(x=300, y=35)
+    membersList_treeview = ttk.Treeview(memberslist_view_Form,
+                                             columns=('Count','ID','LNAME', "FNAME","MINISTRY",
+                                              'CONTACT'),
+                                             selectmode="extended", height=20, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=membersList_treeview.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=membersList_treeview.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    membersList_treeview.heading('Count', text="Count", anchor=CENTER)
+    membersList_treeview.heading('ID', text="ID", anchor=CENTER)
+    membersList_treeview.heading('LNAME', text="Last Name", anchor=CENTER)
+    membersList_treeview.heading('FNAME', text="First Name", anchor=CENTER)
+    membersList_treeview.heading('MINISTRY', text="Ministry", anchor=CENTER)
+    membersList_treeview.heading('CONTACT', text="Contact No.", anchor=CENTER)
+
+
+    membersList_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    membersList_treeview.column('#1', stretch=NO, minwidth=0, width=70, anchor='e')
+    membersList_treeview.column('#2', stretch=NO, minwidth=0, width=100, anchor='e')
+    membersList_treeview.column('#3', stretch=NO, minwidth=0, width=100, anchor='e')
+    membersList_treeview.column('#4', stretch=NO, minwidth=0, width=100, anchor='e')
+    membersList_treeview.column('#5', stretch=NO, minwidth=0, width=100, anchor='e')
+    membersList_treeview.column('#6', stretch=NO, minwidth=0, width=100, anchor='e')
+
+    membersList_treeview.pack()
+  
+    memberList_function()
+   
     
     
 def memberList_function():
@@ -329,7 +496,7 @@ def membersData_frame():
     """
     This is for members Data Frame
     """
-    
+    clearFrame()
     global members_data_frame
     
 
@@ -608,8 +775,11 @@ def dashboard():
     # filemenu2.add_command(label="Checker & Approver",command=check_by_frame)
 
    
-   
+    time_in_attendace
     filemenu3.add_command(label="Member Registration",command=membersData_frame)
+    filemenu3.add_command(label="Time In",command=time_in_attendace)
+    
+    
     filemenu5.add_command(label="Data per Ministry",command=report_piechart_members_Data)
     
     menubar.add_cascade(label="Account", menu=filemenu)
