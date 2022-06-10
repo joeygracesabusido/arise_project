@@ -95,6 +95,72 @@ def clearFrame():
     MidViewForm9.pack_forget()
     
 #===========================================Report Frame=================================================
+def absent_members():
+    """
+    this function is for absent
+    members
+    """
+    datefrom = dateSearch.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+    
+    dateto = datetime.now()
+
+    dataSearch2 = db['attendance']
+    search_data2 = dataSearch2.find({'created': {'$gte':date_time_obj_from, '$lte':dateto}})
+
+    
+    
+    subtitle1=[]
+    for i in search_data2:
+        a = i['members_id']+ ' ' +i['fname']+' ' +i['lname']
+        
+        subtitle1.append(a)
+    
+
+
+    dataSearch3 = db['members_detail']
+    search_data3= dataSearch3.find()
+    # search_data3= dataSearch3.find({'members_id': { '$ne': a } })
+    subtitle2=[]
+    for i in search_data3:
+        b = i['members_id']+ ' ' +i['fname']+' ' +i['lname']
+        subtitle2.append(b)
+    
+
+    res = [x for x in subtitle1 + subtitle2 if x not in subtitle1 or x not in subtitle2]
+    
+    for i in res:
+        absent_listbox.insert(END, (i))
+
+    
+def absent_members_frame():
+    """
+    This function is for absent member frame
+    """
+    
+    absent_data_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
+    absent_data_frame.place(x=20, y=8)
+
+
+
+    global absent_listbox
+    absent_listbox = tk.Listbox(absent_data_frame,
+                                  width=140, height=18, bg='darkblue', fg='white', font=('courier', 10))
+    absent_listbox.place(x=150, y=70)
+
+    global dateSearch
+    dateSearch = DateEntry(absent_data_frame, width=15, background='darkblue',
+                                  date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    dateSearch.place(x=10, y=50)
+    dateSearch.configure(justify='center')
+
+    absent_members()
+    
+    
+    
+
+
 def report_piechart_members_Data():
     """
     this function is to test pie chart
@@ -190,7 +256,7 @@ def attendance_list():
     """
     
     dataSearch = db['attendance']
-    
+
     datefrom = dateSearch.get()
     date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
     
@@ -525,7 +591,90 @@ def members_list():
         membersList_treeview.insert('', 'end', values=(members['count'],members['members_id'],members['lname'],
                                 members['fname'],members['ministry'],
                                 members['contact_num']))
+def delete_membersDetail():
+    """
+    this function is for 
+    deleting membersDetail
+    """
+    dataSearch = db['members_detail']
+    query = {'members_id':{'$regex':search_input_mReg_entry.get()}}
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+    if result == 'yes':
+        x = dataSearch.delete_one(query)
+        messagebox.showinfo('JRS', 'Selected Record has been deleted')
+        memberList_function()
 
+
+def update_membersDetail():
+    """
+    this function is for updating
+    members Details
+    """
+    dataSearch = db['members_detail']
+    query = {'members_id':{'$regex':search_input_mReg_entry.get()}}
+
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+    if result == 'yes':
+       
+        try:
+            newValue = { "$set": { 
+                                'lname': last_name_member_reg.get(),
+                                'fname': first_name_member_reg.get(),
+                                'address': add_reg_entry.get('1.0', 'end-1c'),
+                                'birthday': bday_reg.get(),
+                                'age': int(age_member_reg.get()),
+                                'ministry': ministry_reg_entry.get(),
+                                'contact_num': contact_member_reg.get()
+                            }           
+                        }
+            dataSearch.update_many(query, newValue)
+            messagebox.showinfo('JRS', 'Data has been updated')
+            memberList_function()
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+def search_member_for_update():
+    """
+    This function is for searching 
+    member by using id number for updating 
+    purposes
+    """
+    dataSearch = db['members_detail']
+    search_data = dataSearch.find({'members_id':{'$regex':search_input_mReg_entry.get()}})
+    
+    for i in search_data:
+        member_id = i['members_id']
+        l_name_search = i['lname']
+        f_name_search = i['fname']
+        ministry_search = i['ministry']
+        add_search = i['address']
+        brithday_search = i['birthday']
+        age_search = i['age']
+        contactNum_search = i['contact_num']
+        
+        last_name_member_reg.delete(0, END)
+        last_name_member_reg.insert(0, (l_name_search))
+    
+        first_name_member_reg.delete(0, END)
+        first_name_member_reg.insert(0, (f_name_search))
+        
+        ministry_reg_entry.delete(0, END)
+        ministry_reg_entry.insert(0, (ministry_search))
+        
+        add_reg_entry.delete('1.0', END) 
+        add_reg_entry.insert('1.0', (add_search))
+
+        bday_reg.delete(0, END)
+        bday_reg.insert(0, (brithday_search))
+
+        age_member_reg.delete(0, END)
+        age_member_reg.insert(0, (age_search))
+
+        contact_member_reg.delete(0, END)
+        contact_member_reg.insert(0, (contactNum_search))
+
+        search_input_mReg_entry.delete(0, END)
+        search_input_mReg_entry.insert(0, (member_id))
 
 
 def insert_mebers_details():
@@ -617,6 +766,7 @@ def membersData_frame():
     global members_data_frame
     
 
+
     members_data_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
     members_data_frame.place(x=20, y=8)
     
@@ -691,11 +841,31 @@ def membersData_frame():
     global contact_member_reg
     contact_member_reg = Entry(members_data_frame, width=15, font=('Arial', 12))
     contact_member_reg.place(x=110, y=213)
+
+    search_input_mReg_label = Label(members_data_frame, text='Search ID :', width=10, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    search_input_mReg_label.place(x=10, y=300)
+
+    global search_input_mReg_entry
+    search_input_mReg_entry = Entry(members_data_frame, width=15, font=('Arial', 12))
+    search_input_mReg_entry.place(x=110, y=300)
+
+    btn_search_mr = Button(members_data_frame, text='Search', bd=2, bg='yellow green', fg='black',
+                              font=('arial', 10), width=10, height=1,command=search_member_for_update)
+    btn_search_mr.place(x=240, y=300)
     
     
     btn_save = Button(members_data_frame, text='Save', bd=2, bg='green', fg='white',
                               font=('arial', 10), width=10, height=1,command=insert_mebers_details)
     btn_save.place(x=10, y=243)
+
+    btn_update = Button(members_data_frame, text='Update', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=10, height=1,command=update_membersDetail)
+    btn_update.place(x=110, y=243)
+
+    btn_delete = Button(members_data_frame, text='Delete', bd=2, bg='red', fg='white',
+                              font=('arial', 10), width=10, height=1,command=delete_membersDetail)
+    btn_delete.place(x=210, y=243)
 
 
     memberslist_view_Form = Frame(members_data_frame, width=500, height=10)
@@ -705,7 +875,7 @@ def membersData_frame():
     style.theme_use("clam")
     style.configure("Treeview",
                     background="black",
-                    foreground="cyan",
+                    foreground="green",
                     rowheight=15,
                     fieldbackground="yellow")
    
@@ -899,6 +1069,7 @@ def dashboard():
     
     filemenu5.add_command(label="Data per Ministry",command=report_piechart_members_Data)
     filemenu5.add_command(label="Attendance per Sunday",command=attendance_list_frame)
+    filemenu5.add_command(label="Absent per Sunday",command=absent_members_frame)
     
     menubar.add_cascade(label="Account", menu=filemenu)
     menubar.add_cascade(label="User Approval", menu=filemenu2)

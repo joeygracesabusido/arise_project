@@ -110,37 +110,43 @@ def absent_member():
     # for value in search_data:
     #     church_member.append(value['ministry'])
 
-    dataSearch2 = db['members_detail']
-    search_data2 = dataSearch2.find()
-
-    a = ''
+    datefrom = input('Enter Date : ')
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
     
-    subtitle2=[]
+    dateto = datetime.now()
+
+    dataSearch2 = db['attendance']
+    # search_data2 = dataSearch2.find({'created':datetime.now()})
+    search_data2 = dataSearch2.find({'created': {'$gte':date_time_obj_from, '$lte':dateto}})
+    
+    
+    subtitle1=[]
     for i in search_data2:
-        a = i['members_id']
-        c = i['lname'] + ' , ' + i['fname']
-
-
-        dataSearch3 = db['attendance']
-
-        # search_data3= dataSearch3.find({'members_id': { "$nin": [a, "" ] } })
-        search_data3= dataSearch3.find()
-        for value in search_data3:
-            b = value['members_id']
-            if b !=a:
-                subtitle2.append(c)
-
-        # for i in subtitle2:
-        #     print(i)
+        a = i['members_id']+ ' ' +i['fname']+' ' +i['lname']
         
-    lst_of_lst = []
-    for i in subtitle2:
-        spl = i.split(',')
-        lst_of_lst.append(spl)
+        subtitle1.append(a)
+    print(subtitle1)
 
-    print(tabulate(lst_of_lst, headers =['Name',], tablefmt='psql'))
+
+    dataSearch3 = db['members_detail']
+    search_data3= dataSearch3.find()
+    # search_data3= dataSearch3.find({'members_id': { '$ne': a } })
+    subtitle2=[]
+    for i in search_data3:
+        b = i['members_id']+ ' ' +i['fname']+' ' +i['lname']
+        subtitle2.append(b)
+    
+
+    res = [x for x in subtitle1 + subtitle2 if x not in subtitle1 or x not in subtitle2]
+    
+    for i in res:
+        print(i)
+    
             
-    # print(*subtitle2,sep = "\n")
+
+        # print(tabulate(lst_of_lst, headers =['Name',], tablefmt='psql'))
+              
+        # print(*i,sep = "\n")
 
 def attendance_list():
     """
@@ -667,6 +673,7 @@ def testing_array():
 # testing_piechart()
 # testing()
 # insert_login_()
-log_in()
+# log_in()
 # list_ministry()
 # church_ministry()
+absent_member()
