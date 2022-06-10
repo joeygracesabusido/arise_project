@@ -149,7 +149,7 @@ def report_piechart_members_Data():
         return "{:.1f}%\n({:d} g)".format(pct, absolute)
     
     # Creating plot
-    fig, ax = plt.subplots(figsize =(10, 7))
+    fig, ax = plt.subplots(figsize =(9, 5))
     wedges, texts, autotexts = ax.pie(data,
                                     autopct = lambda pct: func(pct, data),
                                     
@@ -171,6 +171,124 @@ def report_piechart_members_Data():
     
     # show plot
     plt.show()
+    
+    
+def attendance_list_function():
+    
+    """
+    this function is for
+    calling the Members List
+    """
+    
+    membersList_attendance_treeview.delete(*membersList_attendance_treeview.get_children())
+    return attendance_list()
+
+def attendance_list():
+    """
+    This function is for
+    attendance list
+    """
+    
+    dataSearch = db['attendance']
+    
+    datefrom = dateSearch.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+    
+    dateto = datetime.now()
+    # date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
+    
+    search_data = dataSearch.find({'created': {'$gte':date_time_obj_from, '$lte':dateto}}).sort('lname', pymongo.ASCENDING)
+
+    members ={}
+    count = 0
+    for row in search_data:
+        count+=1
+       
+        data = {
+            'members_id': row['members_id'],
+            'lname': row['lname'],
+            'fname': row['fname'],
+            'ministry': row['ministry'],
+            'count': count,
+        }
+        
+        members.update(data)
+        
+        membersList_attendance_treeview.insert('', 'end', values=(members['count'],members['members_id'],members['lname'],
+                                members['fname'],members['ministry']))
+ 
+    
+def attendance_list_frame():
+    """
+    This function is for
+    list of Attendance
+    """
+    
+    members_attendance_list_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
+    members_attendance_list_frame.place(x=20, y=8)
+    
+    trans_label = Label(members_attendance_list_frame, text='LIST OF PRESENT',
+                        width=35, height=1, bg='pink', fg='black',
+                          font=('Arial', 15), anchor='center')
+    trans_label.place(x=250, y=2)
+    
+    global dateSearch
+    dateSearch = DateEntry(members_attendance_list_frame, width=15, background='darkblue',
+                                  date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    dateSearch.place(x=10, y=50)
+    dateSearch.configure(justify='center')
+    
+    btn_search = Button(members_attendance_list_frame, text='Search', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=7, height=1,command=attendance_list_function)
+    btn_search.place(x=10, y=80)
+    
+    
+    memberslist_attendance_Form = Frame(members_attendance_list_frame, width=600, height=10)
+    memberslist_attendance_Form.place(x=250, y=30)
+
+    style = ttk.Style(members_attendance_list_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="black",
+                    foreground="cyan",
+                    rowheight=15,
+                    fieldbackground="yellow")
+   
+    
+    
+    global membersList_attendance_treeview
+    scrollbarx = Scrollbar(memberslist_attendance_Form, orient=HORIZONTAL)
+    scrollbary = Scrollbar(memberslist_attendance_Form, orient=VERTICAL)
+    
+    membersList_attendance_treeview = ttk.Treeview(memberslist_attendance_Form,
+                                             columns=('Count','ID','LNAME', "FNAME","MINISTRY",
+                                              ),
+                                             selectmode="extended", height=20, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=membersList_attendance_treeview.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=membersList_attendance_treeview.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    membersList_attendance_treeview.heading('Count', text="Count", anchor=CENTER)
+    membersList_attendance_treeview.heading('ID', text="ID", anchor=CENTER)
+    membersList_attendance_treeview.heading('LNAME', text="Last Name", anchor=CENTER)
+    membersList_attendance_treeview.heading('FNAME', text="First Name", anchor=CENTER)
+    membersList_attendance_treeview.heading('MINISTRY', text="Ministry", anchor=CENTER)
+    
+
+
+    membersList_attendance_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    membersList_attendance_treeview.column('#1', stretch=NO, minwidth=0, width=70, anchor='e')
+    membersList_attendance_treeview.column('#2', stretch=NO, minwidth=0, width=150, anchor='e')
+    membersList_attendance_treeview.column('#3', stretch=NO, minwidth=0, width=150, anchor='e')
+    membersList_attendance_treeview.column('#4', stretch=NO, minwidth=0, width=150, anchor='e')
+    membersList_attendance_treeview.column('#5', stretch=NO, minwidth=0, width=150, anchor='e')
+    
+
+    membersList_attendance_treeview.pack()
+    attendance_list_function()
+    
 
 #===========================================Attendance Frame=====================================
 def insert_attendance():
@@ -191,7 +309,7 @@ def insert_attendance():
     
     try:
         collection.insert_one(dataInsert)
-        
+        attendance_list_frame()
         messagebox.showinfo('JRS','Your Attendance Has been Save')
         last_name_member_reg_time.delete(0, END)
         first_name_member_reg_time.delete(0, END)
@@ -780,6 +898,7 @@ def dashboard():
     
     
     filemenu5.add_command(label="Data per Ministry",command=report_piechart_members_Data)
+    filemenu5.add_command(label="Attendance per Sunday",command=attendance_list_frame)
     
     menubar.add_cascade(label="Account", menu=filemenu)
     menubar.add_cascade(label="User Approval", menu=filemenu2)
