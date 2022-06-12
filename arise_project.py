@@ -95,12 +95,56 @@ def clearFrame():
     MidViewForm9.pack_forget()
     
 #===========================================Report Frame=================================================
+def absent_members_btn():
+    """
+    this function is for searching for 
+    absent with buttons
+    """
+    absent_listbox.delete(0, END)
+    datefrom = dateSearch_absent.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+    
+    dateto = dateSearchTo.get()
+    date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
+
+    dataSearch2 = db['attendance']
+    search_data2 = dataSearch2.find({'created': {'$gte':date_time_obj_from, '$lte':date_time_obj_to}})
+
+    
+    
+    subtitle1=[]
+    for i in search_data2:
+        a = i['members_id']+ ' ' +i['fname']+' ' +i['lname']
+        
+        subtitle1.append(a)
+    
+
+
+    dataSearch3 = db['members_detail']
+    search_data3= dataSearch3.find()
+    # search_data3= dataSearch3.find({'members_id': { '$ne': a } })
+    subtitle2=[]
+    for i in search_data3:
+        b = i['members_id']+ ' ' +i['fname']+' ' +i['lname']
+        subtitle2.append(b)
+    
+
+    res = [x for x in subtitle1 + subtitle2 if x not in subtitle1 or x not in subtitle2]
+    count =0 
+    for i in res:
+        count+=1
+        absent = str(count) + ' ' + i
+        # absent_listbox.delete(0, END)
+        absent_listbox.insert(END,(absent))
+        absent_listbox.bind("<KeyRelease>",absent_members_btn)
+
+
 def absent_members():
     """
     this function is for absent
     members
     """
-    datefrom = dateSearch.get()
+    datefrom = dateSearch_absent.get()
     date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
     
     dateto = datetime.now()
@@ -128,10 +172,18 @@ def absent_members():
     
 
     res = [x for x in subtitle1 + subtitle2 if x not in subtitle1 or x not in subtitle2]
-    
+    count =0 
     for i in res:
-        absent_listbox.insert(END, (i))
+        count+=1
+        absent = str(count) + ' ' + i
 
+        # absent_listbox.delete(0, END)
+        absent_listbox.insert(END,(absent))
+    
+    # for i in res:
+        
+        # absent_listbox.insert(END, absent)
+        # absent_listbox.insert(END, (i))
     
 def absent_members_frame():
     """
@@ -142,20 +194,48 @@ def absent_members_frame():
     absent_data_frame.place(x=20, y=8)
 
 
+    
 
     global absent_listbox
     absent_listbox = tk.Listbox(absent_data_frame,
                                   width=140, height=18, bg='darkblue', fg='white', font=('courier', 10))
     absent_listbox.place(x=150, y=70)
+    absent_listbox.bind("<KeyRelease>",absent_members_btn)
 
-    global dateSearch
-    dateSearch = DateEntry(absent_data_frame, width=15, background='darkblue',
+
+    absent_date_label = Label(absent_data_frame, text='From',
+                        width=13, height=1, bg='yellow', fg='black',
+                        font=('Arial', 10), anchor='center')
+    absent_date_label.place(x=150, y=30)
+
+
+
+    global dateSearch_absent
+    dateSearch_absent = DateEntry(absent_data_frame, width=15, background='darkblue',
                                   date_pattern='yyyy-MM-dd',
                                   foreground='white', borderwidth=2, padx=10, pady=10)
-    dateSearch.place(x=10, y=50)
-    dateSearch.configure(justify='center')
+    dateSearch_absent.place(x=270, y=30)
+    dateSearch_absent.configure(justify='center')
+
+    absent_date_label_to = Label(absent_data_frame, text='From',
+                        width=13, height=1, bg='yellow', fg='black',
+                        font=('Arial', 10), anchor='center')
+    absent_date_label_to.place(x=400, y=30)
+
+    global dateSearchTo
+    dateSearchTo = DateEntry(absent_data_frame, width=15, background='darkblue',
+                                  date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    dateSearchTo.place(x=530, y=30)
+    dateSearchTo.configure(justify='center')
+
+    btn_search = Button(absent_data_frame, text='Search', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=7, height=1,command=absent_members_btn)
+    btn_search.place(x=650, y=30)
+    btn_search.bind('<Return>', absent_listbox)
 
     absent_members()
+    
     
     
     
@@ -204,7 +284,8 @@ def report_piechart_members_Data():
     explode = (0.1, 0.0)
     
     # Creating color parameters
-    colors = ( "orange", "cyan","blue","yellow")
+    colors = ( "orange", "cyan","blue","yellow",
+                "red","green","brown")
     
     # Wedge properties
     wp = { 'linewidth' : 1, 'edgecolor' : "green" }
@@ -245,9 +326,43 @@ def attendance_list_function():
     this function is for
     calling the Members List
     """
-    
     membersList_attendance_treeview.delete(*membersList_attendance_treeview.get_children())
-    return attendance_list()
+    return attendance_list_btn()
+
+def attendance_list_btn():
+    """
+    This function is for
+    attendance list
+    """
+    
+    dataSearch = db['attendance']
+
+    datefrom = dateSearch.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
+    
+    dateto = dateSearchTo_attendanceList.get()
+    date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
+    
+    search_data = dataSearch.find({'created': {'$gte':date_time_obj_from, '$lte':date_time_obj_to}}).sort('created', pymongo.ASCENDING)
+
+    members ={}
+    count = 0
+    for row in search_data:
+        count+=1
+       
+        data = {
+            'members_id': row['members_id'],
+            'lname': row['lname'],
+            'fname': row['fname'],
+            'ministry': row['ministry'],
+            'count': count,
+        }
+        
+        members.update(data)
+        
+        membersList_attendance_treeview.insert('', 'end', values=(members['count'],members['members_id'],members['lname'],
+                                members['fname'],members['ministry']))
+
 
 def attendance_list():
     """
@@ -261,9 +376,9 @@ def attendance_list():
     date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
     
     dateto = datetime.now()
-    # date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
     
-    search_data = dataSearch.find({'created': {'$gte':date_time_obj_from, '$lte':dateto}}).sort('lname', pymongo.ASCENDING)
+    
+    search_data = dataSearch.find({'created': {'$gte':date_time_obj_from, '$lte':dateto}}).sort('created', pymongo.ASCENDING)
 
     members ={}
     count = 0
@@ -304,10 +419,28 @@ def attendance_list_frame():
                                   foreground='white', borderwidth=2, padx=10, pady=10)
     dateSearch.place(x=10, y=50)
     dateSearch.configure(justify='center')
+
+
+    absent_date_label_to = Label(members_attendance_list_frame, text='To',
+                        width=13, height=1, bg='yellow', fg='black',
+                        font=('Arial', 10), anchor='center')
+    absent_date_label_to.place(x=10, y=80)
+
+    global dateSearchTo_attendanceList
+    dateSearchTo_attendanceList = DateEntry(members_attendance_list_frame, width=15, background='darkblue',
+                                  date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    dateSearchTo_attendanceList.place(x=10, y=120)
+    dateSearchTo_attendanceList.configure(justify='center')
     
     btn_search = Button(members_attendance_list_frame, text='Search', bd=2, bg='blue', fg='white',
                               font=('arial', 10), width=7, height=1,command=attendance_list_function)
-    btn_search.place(x=10, y=80)
+    btn_search.place(x=10, y=180)
+
+
+    # global transacID
+    # transacID= Entry(members_attendance_list_frame, width=15, font=('Arial', 12))
+    # transacID.place(x=110, y=55)
     
     
     memberslist_attendance_Form = Frame(members_attendance_list_frame, width=600, height=10)
@@ -353,7 +486,7 @@ def attendance_list_frame():
     
 
     membersList_attendance_treeview.pack()
-    attendance_list_function()
+    attendance_list()
     
 
 #===========================================Attendance Frame=====================================
@@ -361,31 +494,50 @@ def insert_attendance():
     """
     This function is to insert attendance
     """
+
+
     
     collection = db['attendance']
+    datefrom = dateSearch_timeIn.get()
+    timeNow = ('00:00:00')
+    date_time_str2 = datefrom + ' ' + timeNow
+    date_time_obj = datetime.strptime(date_time_str2, '%Y-%m-%d %H:%M:%S')
+    dateToday = datetime.now()
 
-    dataInsert = {
-        'members_id': members_ID_time.get(),
-        'lname': last_name_member_reg_time.get(),
-        'fname': first_name_member_reg_time.get(),
-        'ministry':ministry_reg_entry_time.get(),
-        'created':datetime.now()
+    agg_result= collection.find(
+        { '$and': [ {'created': {'$gte':date_time_obj,'$lte':dateToday}},
+            {'members_id':members_ID_time.get()} ] } )
+    for i in len(agg_result):
+        print()
+    # a = ''
+    # for i in agg_result:
+    #     a = i['members_id']
+    #     if a != '':
+    #         messagebox.showinfo('JRS','Members Has been already time in')
+            
         
-    }
-    
-    try:
-        collection.insert_one(dataInsert)
-        attendance_list_frame()
-        messagebox.showinfo('JRS','Your Attendance Has been Save')
-        last_name_member_reg_time.delete(0, END)
-        first_name_member_reg_time.delete(0, END)
-        ministry_reg_entry_time.delete(0, END)
-        members_ID_time.delete(0, END)
-       
-        
-        
-    except Exception as ex:
-         messagebox.showerror("Error", f"Error due to :{str(ex)}") 
+    #     else:   
+    #         dataInsert = {
+    #             'members_id': members_ID_time.get(),
+    #             'lname': last_name_member_reg_time.get(),
+    #             'fname': first_name_member_reg_time.get(),
+    #             'ministry':ministry_reg_entry_time.get(),
+    #             'created':datetime.now()
+                
+    #         }
+            
+    #         try:
+    #             collection.insert_one(dataInsert)
+                
+    #             messagebox.showinfo('JRS','Your Attendance Has been Save')
+    #             attendance_list_frame()
+    #             last_name_member_reg_time.delete(0, END)
+    #             first_name_member_reg_time.delete(0, END)
+    #             ministry_reg_entry_time.delete(0, END)
+    #             members_ID_time.delete(0, END)
+                
+    #         except Exception as ex:
+    #             messagebox.showerror("Error", f"Error due to :{str(ex)}") 
                 
 def search_member_timeIn_fname():
     """
@@ -451,6 +603,13 @@ def time_in_attendace():
                         width=35, height=1, bg='pink', fg='black',
                           font=('Arial', 15), anchor='center')
     trans_label.place(x=230, y=2)
+
+    global dateSearch_timeIn
+    dateSearch_timeIn = DateEntry(members_attendance_frame, width=15, background='darkblue',
+                                  date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    dateSearch_timeIn.place(x=10, y=5)
+    dateSearch_timeIn.configure(justify='center')
     
     
     l_name_reg_label_time = Label(members_attendance_frame, text='ID Number:', width=10, height=1, bg='yellow', fg='black',

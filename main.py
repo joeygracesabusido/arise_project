@@ -509,7 +509,7 @@ def testing():
     date_time_str2 = date_time_str + ' ' + timeNow
     # print(date_time_str2)
 
-    date_time_obj = datetime.strptime(date_time_str, '%m-%d-%Y').date()
+    date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%d').date()
     today = date.today()
     age = today.year - date_time_obj.year - ((today.month, today.day) < (date_time_obj.month, date_time_obj.day))
 
@@ -666,8 +666,61 @@ def testing_array():
         print(tabulate(i[0], headers =['Name'], tablefmt='psql'))
         
 
+def call_attendance():
 
+    """
+    This function is for calling
+    presetn Member
+    """
+    date_time_str = input('Enter Date: ')
+    timeNow = ('00:00:00')
+    date_time_str2 = date_time_str + ' ' + timeNow
+    date_time_obj = datetime.strptime(date_time_str2, '%Y-%m-%d %H:%M:%S')
 
+    members_ID = input('Enter Members ID : ')
+    collection = db['attendance']
+
+    dateToday = datetime.now()
+
+    agg_result= collection.find(
+       { '$and': [ {'created': {'$gte':date_time_obj, '$lte':dateToday}},
+        {'members_id':members_ID} ] } )
+
+    for i in agg_result:
+        if len(i) == '':
+
+            print('nothing')
+        else:
+            print(len(i))
+
+    # db.collection.aggregate([
+    #     {
+    #         "$lookup": {
+    #         "from": "transaction",
+    #         "localField": "_id",
+    #         "foreignField": "user",
+    #         "as": "trans"
+    #         }
+    #     },
+    #     {
+    #         "$match": {
+    #         "trans.user": {
+    #             "$exists": false
+    #         }
+    #         }
+    #     }
+    #     ])
+
+    # a = ''
+    # for i in agg_result:
+    #     a = i['lname']
+    #     if a != '':
+
+    #         print(a)
+    #     else:
+    #         print('nothing')
+
+call_attendance()
 # testing_array()
 # call_array()
 # testing_piechart()
@@ -676,4 +729,4 @@ def testing_array():
 # log_in()
 # list_ministry()
 # church_ministry()
-absent_member()
+# absent_member()
