@@ -1,4 +1,4 @@
-from types import NoneType
+# from types import NoneType
 from bson.objectid import ObjectId
 import dateutil.parser
 import pymongo
@@ -737,7 +737,35 @@ def call_attendance():
     #     else:
     #         print('nothing')
 
-call_attendance()
+def call_bdy():
+    """
+    This function is for calling
+    bday for the Month
+    """
+    collection = db['members_detail']
+    # date_time_str = input('Enter Date: ')
+    # timeNow = ('00:00:00')
+    # date_time_str2 = date_time_str + ' ' + timeNow
+    # date_time_obj = datetime.strptime(date_time_str2, '%Y-%m-%d %H:%M:%S')
+    
+    
+    # agg_result = collection.find({'birthday': {"$month": date_time_obj}}).sort('members_id',-1)
+    
+    agg_result = collection.find()
+    dateNow = datetime.now()
+    
+    # print(dateNow.month)
+    
+    for i in agg_result:
+        bday = i['birthday']
+        datem = datetime.strptime(bday, "%Y-%m-%d")
+        
+        if datem.month == dateNow.month:
+            print(i['fname']+ ' ' +i['lname']+ ' ' +i['birthday'])
+        
+
+call_bdy()
+# call_attendance()
 # testing_array()
 # call_array()
 # testing_piechart()

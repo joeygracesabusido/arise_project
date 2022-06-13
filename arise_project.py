@@ -95,6 +95,49 @@ def clearFrame():
     MidViewForm9.pack_forget()
     
 #===========================================Report Frame=================================================
+def birthday_list_function():
+    """
+    This function is
+    calling birthday List for the Month 
+    """
+    bdayList_frame_listbox.delete(0, END)
+    collection = db['members_detail']
+   
+    
+    agg_result = collection.find().sort('lname', pymongo.ASCENDING)
+    dateNow = datetime.now()
+    
+    # print(dateNow.month)
+    
+    for i in agg_result:
+        bday = i['birthday']
+        datem = datetime.strptime(bday, "%Y-%m-%d")
+        
+        if datem.month == dateNow.month:
+            bdayList = i['fname']+ ' ' +i['lname']+ ' ' +i['birthday']
+            bdayList_frame_listbox.insert(END,(bdayList))
+            
+def birthday_list_frame():
+    """
+    This function is for
+    Birth day List frame
+    """
+    bdayList_frame = Frame(MidViewForm9, width=930, height=400, bd=2, bg='gray', relief=SOLID)
+    bdayList_frame.place(x=20, y=8)
+
+    trans_label = Label(bdayList_frame, text='Greeting!!! HAPPY BIRTH DAY FROM ARISE FAMILY',
+                        width=50, height=1, bg='pink', fg='black',
+                          font=('Arial', 15), anchor='center')
+    trans_label.place(x=150, y=2)
+
+    global bdayList_frame_listbox
+    bdayList_frame_listbox = tk.Listbox(bdayList_frame,
+                                  width=50, height=10, bg='darkblue', fg='white', font=('courier', 15))
+    bdayList_frame_listbox.place(x=150, y=70)
+    # bdayList_frame_listbox.bind("<KeyRelease>",absent_members_btn)
+    
+    birthday_list_function()
+    
 def absent_members_btn():
     """
     this function is for searching for 
@@ -1038,7 +1081,7 @@ def membersData_frame():
     style.theme_use("clam")
     style.configure("Treeview",
                     background="black",
-                    foreground="green",
+                    foreground="white",
                     rowheight=15,
                     fieldbackground="yellow")
    
@@ -1231,6 +1274,7 @@ def dashboard():
     
     
     filemenu5.add_command(label="Data per Ministry",command=report_piechart_members_Data)
+    filemenu5.add_command(label="BirthDay of The Month",command=birthday_list_frame)
     filemenu5.add_command(label="Attendance per Sunday",command=attendance_list_frame)
     filemenu5.add_command(label="Absent per Sunday",command=absent_members_frame)
     
