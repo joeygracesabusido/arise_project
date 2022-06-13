@@ -1,3 +1,4 @@
+from types import NoneType
 from bson.objectid import ObjectId
 import dateutil.parser
 import pymongo
@@ -682,16 +683,32 @@ def call_attendance():
 
     dateToday = datetime.now()
 
-    agg_result= collection.find(
-       { '$and': [ {'created': {'$gte':date_time_obj, '$lte':dateToday}},
-        {'members_id':members_ID} ] } )
+    agg_result= collection.count_documents(
+       { '$and': [ {'created': 
+                    {'$gte':date_time_obj, '$lte':dateToday}},
+                         {'members_id':members_ID},
+                        #   {'members_id':{'$exists': True } }
+                         ] } )
+    if agg_result > 0:
+        print(agg_result)
+    else:
+        print('Iam nothing')
+    # a = ''
+    # for i in agg_result:
+    #     a = i['members_id']
+    #     if a != '':
+    #         print('JRS','Members Has been already time in')
+    #     else:
+    #         print('No record found')
+    # else:
+    #     print('nothing')
+    
+    # for i in agg_result:
+    #     if len(i) == '':
 
-    for i in agg_result:
-        if len(i) == '':
-
-            print('nothing')
-        else:
-            print(len(i))
+    #         print('nothing')
+    #     else:
+    #         print(len(i))
 
     # db.collection.aggregate([
     #     {

@@ -504,54 +504,58 @@ def insert_attendance():
     date_time_obj = datetime.strptime(date_time_str2, '%Y-%m-%d %H:%M:%S')
     dateToday = datetime.now()
 
-    agg_result= collection.find(
+    agg_result= collection.count_documents(
         { '$and': [ {'created': {'$gte':date_time_obj,'$lte':dateToday}},
             {'members_id':members_ID_time.get()} ] } )
-    for i in len(agg_result):
-        print()
-    # a = ''
-    # for i in agg_result:
-    #     a = i['members_id']
-    #     if a != '':
-    #         messagebox.showinfo('JRS','Members Has been already time in')
+   
+    if agg_result > 0:
+            messagebox.showinfo('JRS','Members Has been already time in')
             
         
-    #     else:   
-    #         dataInsert = {
-    #             'members_id': members_ID_time.get(),
-    #             'lname': last_name_member_reg_time.get(),
-    #             'fname': first_name_member_reg_time.get(),
-    #             'ministry':ministry_reg_entry_time.get(),
-    #             'created':datetime.now()
-                
-    #         }
+    else:   
+        dataInsert = {
+            'members_id': members_ID_time.get(),
+            'lname': last_name_member_reg_time.get(),
+            'fname': first_name_member_reg_time.get(),
+            'ministry':ministry_reg_entry_time.get(),
+            'created':datetime.now()
             
-    #         try:
-    #             collection.insert_one(dataInsert)
-                
-    #             messagebox.showinfo('JRS','Your Attendance Has been Save')
-    #             attendance_list_frame()
-    #             last_name_member_reg_time.delete(0, END)
-    #             first_name_member_reg_time.delete(0, END)
-    #             ministry_reg_entry_time.delete(0, END)
-    #             members_ID_time.delete(0, END)
-                
-    #         except Exception as ex:
-    #             messagebox.showerror("Error", f"Error due to :{str(ex)}") 
+        }
+        
+        try:
+            collection.insert_one(dataInsert)
+            
+            messagebox.showinfo('JRS','Your Attendance Has been Save')
+            attendance_list_frame()
+            last_name_member_reg_time.delete(0, END)
+            first_name_member_reg_time.delete(0, END)
+            ministry_reg_entry_time.delete(0, END)
+            members_ID_time.delete(0, END)
+            
+        except Exception as ex:
+            messagebox.showerror("Error", f"Error due to :{str(ex)}") 
                 
 def search_member_timeIn_fname():
     """
     This function is for searching 
     members tru first name
     """
+    strID = 'i'
     dataSearch = db['members_detail']
-    search_data = dataSearch.find({'fname':{'$regex':first_name_member_reg_time.get()}})
+    search_data = dataSearch.find({
+        'fname':{
+            '$regex': first_name_member_reg_time.get(),
+             '$options': 'i' 
+            }})
+   
+
+  
     
-    for i in search_data:
-        member_id = i['members_id']
-        l_name_search = i['lname']
-        f_name_search = i['fname']
-        ministry_search = i['ministry']
+    for j in search_data:
+        member_id = j['members_id']
+        l_name_search = j['lname']
+        f_name_search = j['fname']
+        ministry_search = j['ministry']
         
         last_name_member_reg_time.delete(0, END)
         last_name_member_reg_time.insert(0, (l_name_search))
@@ -1281,28 +1285,21 @@ def Login():
 
         # query = dataSearch.find_one({'name': USERNAME.get(), 'password':PASSWORD.get()})
         query = {'username': USERNAME.get(), 'password':PASSWORD.get(),'status':'approved'}
-        agg_result = dataSearch.find(query)
+        agg_result = dataSearch.count_documents(query)
 
         
+        if agg_result > 0:
 
-        # if agg_result == '':
-        #         lbl_result.config(text="Invalid username or password", fg="red")
-        #         USERNAME.set("")
-        #         PASSWORD.set("")
-        
-        a = ''
-        for x in agg_result:
-            a = x['username']
-            if agg_result != None :
+            PASSWORD.set("")
+            lbl_result.config(text="")
+            root.withdraw()
+            dashboard()
 
-                PASSWORD.set("")
-                lbl_result.config(text="")
-                root.withdraw()
-                dashboard()
+        else:
 
-                # lbl_result.config(text="Invalid username or password", fg="red")
-                # USERNAME.set("")
-                # PASSWORD.set("")
+            lbl_result.config(text="Invalid Username or Password", fg="red")
+            USERNAME.set("")
+            PASSWORD.set("")
 
            
 
