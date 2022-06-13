@@ -328,7 +328,7 @@ def report_piechart_members_Data():
     
     # Creating color parameters
     colors = ( "orange", "cyan","blue","yellow",
-                "red","green","brown")
+                "green","brown","red")
     
     # Wedge properties
     wp = { 'linewidth' : 1, 'edgecolor' : "green" }
