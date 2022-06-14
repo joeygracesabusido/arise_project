@@ -762,9 +762,47 @@ def call_bdy():
         
         if datem.month == dateNow.month:
             print(i['fname']+ ' ' +i['lname']+ ' ' +i['birthday'])
+            
+def testing_loop():
+    """
+    This function is for 
+    testing Loop
+    """      
+    
+    dataSearch = db['members_detail']
+    search_data = dataSearch.find()
+   
+            # ministry_list = [k for k in search_data]
+            # print(ministry_list)
+    subtitle=[]
+    
+    for value in search_data:
+        subtitle.append(value)  
         
-
-call_bdy()
+    test = subtitle
+    
+    count = 0
+    c = []
+    for i in range(len(test)):
+        count+=1
+        a = test[i]['fname']
+        b =  test[i]['lname']
+        print(count,a, b)
+        # print(count,test[i]['fname'],test[i]['lname'])
+    
+def testingList():
+    """
+    This is only a test
+    """   
+    
+    arr = ['jerome','alson']  
+    
+    for i in range(len(arr)) :
+        print(arr[i][0])
+    
+testingList()        
+# testing_loop()
+# call_bdy()
 # call_attendance()
 # testing_array()
 # call_array()
