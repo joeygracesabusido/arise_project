@@ -530,7 +530,97 @@ def attendance_list_frame():
 
     membersList_attendance_treeview.pack()
     attendance_list()
+
+def church_accounting():
+    """
+    This function is for
+    church
+    """  
+
+    accounting_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
+    accounting_frame.place(x=20, y=8)
     
+    trans_label = Label(accounting_frame, text='LIST OF PRESENT',
+                        width=35, height=1, bg='pink', fg='black',
+                          font=('Arial', 15), anchor='center')
+    trans_label.place(x=250, y=2)
+    
+    global dateSearch
+    dateSearch = DateEntry(accounting_frame, width=15, background='darkblue',
+                                  date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    dateSearch.place(x=10, y=50)
+    dateSearch.configure(justify='center')
+
+
+    absent_date_label_to = Label(accounting_frame, text='To',
+                        width=13, height=1, bg='yellow', fg='black',
+                        font=('Arial', 10), anchor='center')
+    absent_date_label_to.place(x=10, y=80)
+
+    global dateSearchTo_attendanceList
+    dateSearchTo_attendanceList = DateEntry(accounting_frame, width=15, background='darkblue',
+                                  date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    dateSearchTo_attendanceList.place(x=10, y=120)
+    dateSearchTo_attendanceList.configure(justify='center')
+    
+    btn_search = Button(accounting_frame, text='Search', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=7, height=1,command=attendance_list_function)
+    btn_search.place(x=10, y=180)
+
+
+    # global transacID
+    # transacID= Entry(members_attendance_list_frame, width=15, font=('Arial', 12))
+    # transacID.place(x=110, y=55)
+    
+    
+    accounting_search_treeviewForm = Frame(accounting_frame, width=600, height=10)
+    accounting_search_treeviewForm.place(x=250, y=30)
+
+    style = ttk.Style(accounting_frame)
+    style.theme_use("clam")
+    style.configure("Treeview",
+                    background="white",
+                    foreground="black",
+                    rowheight=15,
+                    fieldbackground="yellow")
+   
+    
+    
+    global accounting_search_treeview
+    scrollbarx = Scrollbar(accounting_search_treeviewForm, orient=HORIZONTAL)
+    scrollbary = Scrollbar(accounting_search_treeviewForm, orient=VERTICAL)
+    
+    accounting_search_treeview = ttk.Treeview(accounting_search_treeviewForm,
+                                             columns=('Count','ID','LNAME', "FNAME","MINISTRY",
+                                              ),
+                                             selectmode="extended", height=20, yscrollcommand=scrollbary.set,
+                                             xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=accounting_search_treeview.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=accounting_search_treeview.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    accounting_search_treeview.heading('Count', text="Count", anchor=CENTER)
+    accounting_search_treeview.heading('ID', text="ID", anchor=CENTER)
+    accounting_search_treeview.heading('LNAME', text="Last Name", anchor=CENTER)
+    accounting_search_treeview.heading('FNAME', text="First Name", anchor=CENTER)
+    accounting_search_treeview.heading('MINISTRY', text="Ministry", anchor=CENTER)
+    
+
+
+    accounting_search_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
+    accounting_search_treeview.column('#1', stretch=NO, minwidth=0, width=70, anchor='e')
+    accounting_search_treeview.column('#2', stretch=NO, minwidth=0, width=150, anchor='e')
+    accounting_search_treeview.column('#3', stretch=NO, minwidth=0, width=150, anchor='e')
+    accounting_search_treeview.column('#4', stretch=NO, minwidth=0, width=150, anchor='e')
+    accounting_search_treeview.column('#5', stretch=NO, minwidth=0, width=150, anchor='e')
+    
+
+    accounting_search_treeview.pack()
+    
+
+
 
 #===========================================Attendance Frame=====================================
 def insert_attendance():
@@ -1272,11 +1362,13 @@ def dashboard():
     filemenu3.add_command(label="Member Registration",command=membersData_frame)
     filemenu3.add_command(label="Time In",command=time_in_attendace)
     
-    
+    church_accounting
     filemenu5.add_command(label="Data per Ministry",command=report_piechart_members_Data)
     filemenu5.add_command(label="BirthDay of The Month",command=birthday_list_frame)
     filemenu5.add_command(label="Attendance per Sunday",command=attendance_list_frame)
     filemenu5.add_command(label="Absent per Sunday",command=absent_members_frame)
+
+    filemenu4.add_command(label="Accounting",command=church_accounting)
     
     menubar.add_cascade(label="Account", menu=filemenu)
     menubar.add_cascade(label="User Approval", menu=filemenu2)
