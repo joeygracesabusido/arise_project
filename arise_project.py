@@ -534,6 +534,62 @@ def attendance_list_frame():
     membersList_attendance_treeview.pack()
     attendance_list()
 #=========================================this is for accounting frame==========================================
+
+
+def coa_list_value():
+    """
+    This function is for
+    coa list
+    """
+    dataSearch = db['chartOFaccount'] 
+    # agg_result = dataSearch.find()
+    agg_result = dataSearch.find().sort('chart_of_account', pymongo.ASCENDING)
+
+    data = []
+    for x in agg_result:
+        data1 = x['chart_of_account'] + ' ' + x['category']
+        data.append(data1)
+    return data
+
+def coa_list():
+
+    """
+    This function is for 
+    testing list coa from importation
+    """
+    from chart_of_account import test_coa
+    collection = db['chartOFaccount']
+    query = collection.find()
+
+    listCOA = {}
+    Test_list = ''
+    count = 0
+    for i in query:
+        
+        # listCOA.update({len(listCOA)+1:{
+                
+        #         'chart_of_account': i['chart_of_account'],
+        #         'category': i['category'],
+                
+        #     }})
+        data = {
+                
+                'chart_of_account': i['chart_of_account'],
+                'category': i['category'],
+                
+            }
+        
+        listCOA.update(data)
+        Test_list =test_coa(listCOA)  
+
+        Test_list.list_chart_of_account()
+
+        # coa_listbox.delete(0, END)
+        coa_listbox.insert(END,(Test_list.list_chart_of_account()))
+
+
+
+
 def insert_coa():
     """
     This function is for inserting
@@ -541,37 +597,21 @@ def insert_coa():
     """
     # from pythonClass import Person
 
-    from chart_of_account import testCoa,test_coa
+    from chart_of_account import SaveCoa
 
-    # name1 = input("Enter Chart of Account: ")
-    # age2 = input("Enter Category:")
+   
 
-    # p1 = testCoa(name1,age2)
-
-
-    # p1.insert_chartofAccount()
-
-    collection = db['chartOFaccount']
-    query = collection.find()
-
-    a = ""
-    Test_list = ''
-    for i in query:
-        a = i['chart_of_account']     
-
-        Test_list =test_coa(a)  
-
-        Test_list.list_chart_of_account()
-
+    
+    coa_listbox.delete(0, END)
     Chart_of_account = chart_of_account_insert_entry.get()
     Category = category_coa_entry.get()
 
-    chartOfAccount = testCoa(Chart_of_account,Category)
+    chartOfAccount = SaveCoa(Chart_of_account,Category)
 
     chartOfAccount.insert_chartofAccount()
-    test_coa()
-    messagebox.showinfo('JRS','Your chart of account Has been Save')
     
+    messagebox.showinfo('JRS','Your chart of account Has been Save')
+    coa_list()
 
     chart_of_account_insert_entry.delete(0, END)
     category_coa_entry.delete(0, END)
@@ -584,9 +624,16 @@ def chart_of_account():
     This function is for 
     inserting chart of account
     """
-
+   
+    
     chart_of_account_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
     chart_of_account_frame.place(x=20, y=8)
+
+    global coa_listbox
+    coa_listbox = tk.Listbox(chart_of_account_frame,
+                                  width=50, height=18, bg='darkblue', fg='white', font=('courier', 10))
+    coa_listbox.place(x=450, y=70)
+    coa_listbox.bind("<KeyRelease>",absent_members_btn)
 
     chart_of_account_lbl = Label(chart_of_account_frame, text='Chart of account',
                         width=15, height=1, bg='yellow', fg='black',
@@ -611,12 +658,14 @@ def chart_of_account():
                               font=('arial', 10), width=7, height=1,command=insert_coa)
     btn_save.place(x=10, y=140)
 
-def church_accounting():
+    coa_list()
+
+def journal_entry():
     """
     This function is for
-    church
+    Journal Entry
     """  
-    
+    from chart_of_account import test_coa
     accounting_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
     accounting_frame.place(x=20, y=8)
     
@@ -624,30 +673,57 @@ def church_accounting():
                         width=35, height=1, bg='pink', fg='black',
                           font=('Arial', 15), anchor='center')
     trans_label.place(x=250, y=2)
+
+    chartOfAccount_list_label = Label(accounting_frame, text='TRans Date:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    chartOfAccount_list_label.place(x=10, y=50)
     
     global dateSearch
     dateSearch = DateEntry(accounting_frame, width=15, background='darkblue',
                                   date_pattern='yyyy-MM-dd',
                                   foreground='white', borderwidth=2, padx=10, pady=10)
-    dateSearch.place(x=10, y=50)
+    dateSearch.place(x=150, y=50)
     dateSearch.configure(justify='center')
 
 
-    absent_date_label_to = Label(accounting_frame, text='To',
-                        width=13, height=1, bg='yellow', fg='black',
-                        font=('Arial', 10), anchor='center')
-    absent_date_label_to.place(x=10, y=80)
+    chartOfAccount_list_label = Label(accounting_frame, text='Chart of Account:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    chartOfAccount_list_label.place(x=10, y=80)
 
-    global dateSearchTo_attendanceList
-    dateSearchTo_attendanceList = DateEntry(accounting_frame, width=15, background='darkblue',
-                                  date_pattern='yyyy-MM-dd',
-                                  foreground='white', borderwidth=2, padx=10, pady=10)
-    dateSearchTo_attendanceList.place(x=10, y=120)
-    dateSearchTo_attendanceList.configure(justify='center')
+   
+    global chartOfAccount_list_entry
+    chartOfAccount_list_entry = ttk.Combobox(accounting_frame, width=15)
+    chartOfAccount_list_entry['values'] = coa_list_value()
+    chartOfAccount_list_entry.place(x=150, y=80)
+
+    chartOfAccount_list_label = Label(accounting_frame, text='Amount:', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    chartOfAccount_list_label.place(x=10, y=110)
+
+    global amount_entry
+    amount_entry = Entry(accounting_frame, width=20, font=('Arial', 11))
+    amount_entry.place(x=150, y=110)
+
+    add_reg_label = Label(accounting_frame, text='Particular:', width=14, height=1, bg='yellow', fg='black',
+                          font=('Arial', 10), anchor='e')
+    add_reg_label.place(x=10, y=140)
+
+    global add_reg_entry
+    particular_journale_entry = scrolledtext.ScrolledText(accounting_frame,
+                                                          wrap=tk.WORD,
+                                                          width=20,
+                                                          height=3,
+                                                          font=("Arial",
+                                                                10))
+    particular_journale_entry.place(x=150, y=140)
+
     
-    btn_search = Button(accounting_frame, text='Search', bd=2, bg='blue', fg='white',
+    btn_search = Button(accounting_frame, text='Save', bd=2, bg='blue', fg='white',
                               font=('arial', 10), width=7, height=1,command=attendance_list_function)
-    btn_search.place(x=10, y=180)
+    btn_search.place(x=10, y=200)
 
 
     # global transacID
@@ -656,7 +732,7 @@ def church_accounting():
     
     
     accounting_search_treeviewForm = Frame(accounting_frame, width=600, height=10)
-    accounting_search_treeviewForm.place(x=250, y=30)
+    accounting_search_treeviewForm.place(x=350, y=30)
 
     style = ttk.Style(accounting_frame)
     style.theme_use("clam")
@@ -691,10 +767,10 @@ def church_accounting():
 
     accounting_search_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
     accounting_search_treeview.column('#1', stretch=NO, minwidth=0, width=70, anchor='e')
-    accounting_search_treeview.column('#2', stretch=NO, minwidth=0, width=150, anchor='e')
-    accounting_search_treeview.column('#3', stretch=NO, minwidth=0, width=150, anchor='e')
-    accounting_search_treeview.column('#4', stretch=NO, minwidth=0, width=150, anchor='e')
-    accounting_search_treeview.column('#5', stretch=NO, minwidth=0, width=150, anchor='e')
+    accounting_search_treeview.column('#2', stretch=NO, minwidth=0, width=70, anchor='e')
+    accounting_search_treeview.column('#3', stretch=NO, minwidth=0, width=70, anchor='e')
+    accounting_search_treeview.column('#4', stretch=NO, minwidth=0, width=70, anchor='e')
+    accounting_search_treeview.column('#5', stretch=NO, minwidth=0, width=70, anchor='e')
     
 
     accounting_search_treeview.pack()
@@ -1450,7 +1526,7 @@ def dashboard():
 
     # this is for accounting frame
     filemenu4.add_command(label="Insert Chart of Account",command=chart_of_account)
-    filemenu4.add_command(label="Journal Entry",command=church_accounting)
+    filemenu4.add_command(label="Journal Entry",command=journal_entry)
     
     menubar.add_cascade(label="Account", menu=filemenu)
     menubar.add_cascade(label="User Approval", menu=filemenu2)
