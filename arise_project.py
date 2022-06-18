@@ -48,6 +48,9 @@ import re
 from matplotlib import pyplot as plt
 import numpy as np
 
+# this is for classes function
+# from chart_of_account import testCoa
+
 
 from bson.objectid import ObjectId
 import dateutil.parser
@@ -530,13 +533,77 @@ def attendance_list_frame():
 
     membersList_attendance_treeview.pack()
     attendance_list()
+#=========================================this is for accounting frame==========================================
+def insert_coa():
+    """
+    This function is for inserting
+    chart of account
+    """
+    # from pythonClass import Person
+
+    from chart_of_account import testCoa,list_chart_of_account
+
+    # name1 = input("Enter Chart of Account: ")
+    # age2 = input("Enter Category:")
+
+    # p1 = testCoa(name1,age2)
+
+
+    # p1.insert_chartofAccount()
+
+    Chart_of_account = chart_of_account_insert_entry.get()
+    Category = category_coa_entry.get()
+
+    chartOfAccount = testCoa(Chart_of_account,Category)
+
+    chartOfAccount.insert_chartofAccount()
+    messagebox.showinfo('JRS','Your chart of account Has been Save')
+    
+
+    chart_of_account_insert_entry.delete(0, END)
+    category_coa_entry.delete(0, END)
+
+
+
+
+def chart_of_account():
+    """
+    This function is for 
+    inserting chart of account
+    """
+
+    chart_of_account_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
+    chart_of_account_frame.place(x=20, y=8)
+
+    chart_of_account_lbl = Label(chart_of_account_frame, text='Chart of account',
+                        width=15, height=1, bg='yellow', fg='black',
+                        font=('Arial', 10), anchor='center')
+    chart_of_account_lbl.place(x=10, y=80)
+
+    global chart_of_account_insert_entry
+    chart_of_account_insert_entry = Entry(chart_of_account_frame, width=20, font=('Arial', 11))
+    chart_of_account_insert_entry.place(x=150, y=85)
+
+    chart_of_account_lbl = Label(chart_of_account_frame, text='Account Category',
+                        width=15, height=1, bg='yellow', fg='black',
+                        font=('Arial', 10), anchor='center')
+    chart_of_account_lbl.place(x=10, y=115)
+
+    global category_coa_entry
+    category_coa_entry = ttk.Combobox(chart_of_account_frame, width=13,font=('Arial', 11))
+    category_coa_entry['values'] = ['Income','Expense']
+    category_coa_entry.place(x=150, y=115)
+
+    btn_save = Button(chart_of_account_frame, text='Save', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=7, height=1,command=insert_coa)
+    btn_save.place(x=10, y=140)
 
 def church_accounting():
     """
     This function is for
     church
     """  
-
+    
     accounting_frame = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
     accounting_frame.place(x=20, y=8)
     
@@ -1362,13 +1429,15 @@ def dashboard():
     filemenu3.add_command(label="Member Registration",command=membersData_frame)
     filemenu3.add_command(label="Time In",command=time_in_attendace)
     
-    church_accounting
+    # for report frame menu
     filemenu5.add_command(label="Data per Ministry",command=report_piechart_members_Data)
     filemenu5.add_command(label="BirthDay of The Month",command=birthday_list_frame)
     filemenu5.add_command(label="Attendance per Sunday",command=attendance_list_frame)
     filemenu5.add_command(label="Absent per Sunday",command=absent_members_frame)
 
-    filemenu4.add_command(label="Accounting",command=church_accounting)
+    # this is for accounting frame
+    filemenu4.add_command(label="Insert Chart of Account",command=chart_of_account)
+    filemenu4.add_command(label="Journal Entry",command=church_accounting)
     
     menubar.add_cascade(label="Account", menu=filemenu)
     menubar.add_cascade(label="User Approval", menu=filemenu2)
