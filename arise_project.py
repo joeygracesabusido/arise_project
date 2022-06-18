@@ -541,7 +541,7 @@ def insert_coa():
     """
     # from pythonClass import Person
 
-    from chart_of_account import testCoa,list_chart_of_account
+    from chart_of_account import testCoa,test_coa
 
     # name1 = input("Enter Chart of Account: ")
     # age2 = input("Enter Category:")
@@ -551,12 +551,25 @@ def insert_coa():
 
     # p1.insert_chartofAccount()
 
+    collection = db['chartOFaccount']
+    query = collection.find()
+
+    a = ""
+    Test_list = ''
+    for i in query:
+        a = i['chart_of_account']     
+
+        Test_list =test_coa(a)  
+
+        Test_list.list_chart_of_account()
+
     Chart_of_account = chart_of_account_insert_entry.get()
     Category = category_coa_entry.get()
 
     chartOfAccount = testCoa(Chart_of_account,Category)
 
     chartOfAccount.insert_chartofAccount()
+    test_coa()
     messagebox.showinfo('JRS','Your chart of account Has been Save')
     
 

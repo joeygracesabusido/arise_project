@@ -36,24 +36,32 @@ class testCoa:
         except Exception as ex:
             print("Error", f"Error due to :{str(ex)}") 
     
-class list_coa:
+class test_coa:
     def __init__(self, list_coa):
         self.list_coa = list_coa
-       
+
     def list_chart_of_account(self):
         """
         This function is for is 
         for querying all record 
         from chartOFaccount table
         """
-    
-        collection = db['chartOFaccount']
-        query = collection.find()
+        print('This your account:' + self.list_coa)
 
-        a = ''
-        for i in query:
-            a = i['chart_of_account']
-            return self.a
+collection = db['chartOFaccount']
+query = collection.find()
+
+a = ""
+Test_list = ''
+for i in query:
+    a = i['chart_of_account']     
+
+    Test_list =test_coa(a)  
+
+    Test_list.list_chart_of_account()
+    
+       
+            
       
        
         
