@@ -26,6 +26,8 @@ from PollyReports import *
 from os import startfile
 import xlsxwriter
 
+from matplotlib import pyplot as plt
+
 # from docx import Document
 # from docx.shared import Inches
 
@@ -174,7 +176,7 @@ def absent_members_btn():
         b = i['members_id']+ ' ' +i['fname']+' ' +i['lname']
         subtitle2.append(b)
     
-
+    # this is how to compare the list and give the result of the comparison
     res = [x for x in subtitle1 + subtitle2 if x not in subtitle1 or x not in subtitle2]
     count =0 
     for i in res:
@@ -282,7 +284,49 @@ def absent_members_frame():
 
     absent_members()
     
+def graph_attendance():
+
+    """
+    This function is for
+    graphical representation
+    of church attendance
+    """ 
+
+    dataSearch3 = db['attendance']
+   
+    agg_result = dataSearch3.find()
+
+    subtitle2=[]
+    for i in agg_result:
+        date1 = i['created']
+        # datem = datetime.strptime(date1, "%Y-%m-%d")
+        datem = (date1.strftime('%Y-%m-%d'))
+        subtitle2.append(datem)
+    # res = Counter(subtitle2)
+    result = dict((i, subtitle2.count(i)) for i in subtitle2) # count of attendance tru looping ofdate
+    keys = result.keys()
+
+    number_of_attendae = result.values()
+    date1 =[]
+    for i in keys:
+        date1.append(i)
     
+    
+    number2 = []
+    for x in number_of_attendae:
+        number2.append(x)
+
+   
+    x = date1 # group of date for attendance
+    y = number2 # number of attendae in list data
+
+    plt.plot(x,y)
+    plt.title("Attendance Graph per Services")
+    plt.xlabel("Dates")
+    plt.ylabel("Number of Attendae")
+    plt.show()
+
+
     
     
 
@@ -364,8 +408,34 @@ def report_piechart_members_Data():
     
     # show plot
     plt.show()
+
+def perMinistryAttendance():
+    """
+    This function
+    is for querying of per ministry attendance
+
+    """
+    dataSearch = db['attendance']
+
+    datefrom = dateSearch.get()
+    date_time_obj_from = datetime.strptime(datefrom, '%Y-%m-%d')
     
+    dateto = dateSearchTo_attendanceList.get()
+    date_time_obj_to = datetime.strptime(dateto, '%Y-%m-%d')
     
+    search_data = dataSearch.find({'created': {'$gte':date_time_obj_from, '$lte':date_time_obj_to}}).sort('created', pymongo.ASCENDING) 
+
+    subtitle2=[]
+    for i in search_data:
+        a = i['ministry']
+        
+
+        dataSearch3 = db['attendance']
+
+        search_data3= dataSearch3.count_documents({'ministry':a})
+        subtitle2.append(search_data3)
+    for z in subtitle2:
+        print(z)
 def attendance_list_function():
     
     """
@@ -374,6 +444,7 @@ def attendance_list_function():
     """
     membersList_attendance_treeview.delete(*membersList_attendance_treeview.get_children())
     return attendance_list_btn()
+
 
 def attendance_list_btn():
     """
@@ -409,7 +480,7 @@ def attendance_list_btn():
         membersList_attendance_treeview.insert('', 'end', values=(members['count'],members['members_id'],members['lname'],
                                 members['fname'],members['ministry']))
 
-
+        perMinistryAttendance()
 def attendance_list():
     """
     This function is for
@@ -660,6 +731,130 @@ def chart_of_account():
 
     coa_list()
 
+def delete_journalEntry():
+    """
+    This function is for 
+    deleting journal entry
+    """
+    dataSearch = db['journal_entry']
+    query = {'_id': ObjectId(search_id_entry.get())}
+
+    if search_id_entry =='':
+        messagebox.showinfo('JRS', 'Please fill up TRans id for delete Transaction')
+    else:
+        result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+        if result == 'yes':
+            x = dataSearch.delete_one(query)
+            messagebox.showinfo('JRS', 'Selected Record has been deleted')
+            view_journal_entry_treeview()
+
+def select_record_treeview_journalEntry():
+    """
+    this function is for
+    selecting record from
+    treeview
+    """
+    
+    particular_journale_entry.delete('1.0',END)
+    amount_entry.delete(0, END)
+    chartOfAccount_list_entry.delete(0, END)
+
+
+    selected = accounting_search_treeview.focus()
+    values = accounting_search_treeview.item(selected)
+    selectedItems = values['values']
+    
+
+
+    dataSearch = db['journal_entry']
+    query = {'_id': ObjectId(selectedItems[0])}
+    try:
+       
+        
+        for x in dataSearch.find(query):
+            
+            id_num = x['_id']
+            date_entry = x['date']
+            chartofAccount = x['chart_of_account']
+            amount = x['amount']
+            particular = x['particular']
+            
+            
+            date_journal_entry.insert(0, date_entry)
+            chartOfAccount_list_entry.insert(0, chartofAccount)
+            amount_entry.insert(0, amount)
+            particular_journale_entry.insert('1.0', particular)
+
+            search_id_entry.delete(0,END)
+            search_id_entry.insert(0,id_num)
+            
+
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+def view_journal_entry_treeview():
+    
+    """
+    this function is for
+    button to display the list
+    of supplier
+    """
+    
+    accounting_search_treeview.delete(*accounting_search_treeview.get_children())
+    return view_journal_entry()
+
+def view_journal_entry():
+    """
+    This function is for 
+    accounting treeview
+    """
+    dataSearch = db['journal_entry']
+    # query = {'customerID':customerID_entry.get() }
+    try:
+        count =0
+        for x in dataSearch.find():
+            count+=1
+            id_num = x['_id']
+            date_search = x['date']
+            chart_of_account = x['chart_of_account']
+            amount = x['amount']
+            amount2 = '{:,.2f}'.format(amount)
+            particular = x['particular']
+            
+            accounting_search_treeview.insert('', 'end', values=(id_num,count,date_search,
+                                    chart_of_account,amount2,particular))
+
+            
+    except Exception as ex:
+        messagebox.showerror("Error", f"Error due to :{str(ex)}")
+
+
+
+def insert_journal_entry():
+    """
+    This function is for 
+    Inserting Data to journal Entry Database
+    """
+
+    from chart_of_account import InsertJournal
+
+    date_entry = date_journal_entry.get()
+    chart_ofAccount = chartOfAccount_list_entry.get()
+    amount = float(amount_entry.get())
+    particular = particular_journale_entry.get('1.0', 'end-1c')
+
+    if date_entry == '' or chart_ofAccount == '' or amount == '' or particular == '':
+        messagebox.showinfo('JRS','Please fill up blank fields')
+    else:
+        insert_entry = InsertJournal(date_entry,chart_ofAccount,amount,particular)
+        messagebox.showinfo('JRS','Your Data has been save')
+        insert_entry.insert_journal()
+        view_journal_entry_treeview()
+        
+
+        particular_journale_entry.delete('1.0',END)
+        amount_entry.delete(0, END)
+        chartOfAccount_list_entry.delete(0, END)
 def journal_entry():
     """
     This function is for
@@ -679,12 +874,12 @@ def journal_entry():
                                              font=('Arial', 10), anchor='e')
     chartOfAccount_list_label.place(x=10, y=50)
     
-    global dateSearch
-    dateSearch = DateEntry(accounting_frame, width=15, background='darkblue',
+    global date_journal_entry
+    date_journal_entry = DateEntry(accounting_frame, width=15, background='darkblue',
                                   date_pattern='yyyy-MM-dd',
                                   foreground='white', borderwidth=2, padx=10, pady=10)
-    dateSearch.place(x=150, y=50)
-    dateSearch.configure(justify='center')
+    date_journal_entry.place(x=150, y=50)
+    date_journal_entry.configure(justify='center')
 
 
     chartOfAccount_list_label = Label(accounting_frame, text='Chart of Account:', 
@@ -711,7 +906,7 @@ def journal_entry():
                           font=('Arial', 10), anchor='e')
     add_reg_label.place(x=10, y=140)
 
-    global add_reg_entry
+    global particular_journale_entry
     particular_journale_entry = scrolledtext.ScrolledText(accounting_frame,
                                                           wrap=tk.WORD,
                                                           width=20,
@@ -721,14 +916,36 @@ def journal_entry():
     particular_journale_entry.place(x=150, y=140)
 
     
-    btn_search = Button(accounting_frame, text='Save', bd=2, bg='blue', fg='white',
-                              font=('arial', 10), width=7, height=1,command=attendance_list_function)
-    btn_search.place(x=10, y=200)
+   
 
 
-    # global transacID
-    # transacID= Entry(members_attendance_list_frame, width=15, font=('Arial', 12))
-    # transacID.place(x=110, y=55)
+    chartOfAccount_list_label = Label(accounting_frame, text='Trans ID', 
+                                            width=14, height=1, bg='yellow', fg='black',
+                                             font=('Arial', 10), anchor='e')
+    chartOfAccount_list_label.place(x=10, y=235)
+
+    global search_id_entry
+    search_id_entry = Entry(accounting_frame, width=20, font=('Arial', 11))
+    search_id_entry.place(x=150, y=235)
+
+    
+
+    btn_journalSave = Button(accounting_frame, text='Save', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=7, height=1,command=insert_journal_entry)
+    btn_journalSave.place(x=10, y=200)
+
+
+    btn_search_func = Button(accounting_frame, text='Selected Value', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=10, height=1,
+                              command=select_record_treeview_journalEntry)
+    btn_search_func.place(x=800, y=10)
+
+    btn_search_func = Button(accounting_frame, text='Delete', bd=2, bg='red', fg='white',
+                              font=('arial', 10), width=10, height=1,
+                              command=delete_journalEntry)
+    btn_search_func.place(x=150, y=200)
+
+    
     
     
     accounting_search_treeviewForm = Frame(accounting_frame, width=600, height=10)
@@ -749,7 +966,8 @@ def journal_entry():
     scrollbary = Scrollbar(accounting_search_treeviewForm, orient=VERTICAL)
     
     accounting_search_treeview = ttk.Treeview(accounting_search_treeviewForm,
-                                             columns=('Count','ID','LNAME', "FNAME","MINISTRY",
+                                             columns=('ID','Count','Date','ChartofAccount', "Particular",
+                                             "Amount",
                                               ),
                                              selectmode="extended", height=20, yscrollcommand=scrollbary.set,
                                              xscrollcommand=scrollbarx.set)
@@ -757,23 +975,26 @@ def journal_entry():
     scrollbary.pack(side=RIGHT, fill=Y)
     scrollbarx.config(command=accounting_search_treeview.xview)
     scrollbarx.pack(side=BOTTOM, fill=X)
-    accounting_search_treeview.heading('Count', text="Count", anchor=CENTER)
     accounting_search_treeview.heading('ID', text="ID", anchor=CENTER)
-    accounting_search_treeview.heading('LNAME', text="Last Name", anchor=CENTER)
-    accounting_search_treeview.heading('FNAME', text="First Name", anchor=CENTER)
-    accounting_search_treeview.heading('MINISTRY', text="Ministry", anchor=CENTER)
+    accounting_search_treeview.heading('Count', text="Count", anchor=CENTER)
+    accounting_search_treeview.heading('Date', text="Date", anchor=CENTER)
+    accounting_search_treeview.heading('ChartofAccount', text="Chart of Account", anchor=CENTER)
+    accounting_search_treeview.heading('Particular', text="Particular", anchor=CENTER)
+    accounting_search_treeview.heading('Amount', text="Amount", anchor=CENTER)
     
 
 
     accounting_search_treeview.column('#0', stretch=NO, minwidth=0, width=0, anchor='e')
-    accounting_search_treeview.column('#1', stretch=NO, minwidth=0, width=70, anchor='e')
+    accounting_search_treeview.column('#1', stretch=NO, minwidth=0, width=30, anchor='e')
     accounting_search_treeview.column('#2', stretch=NO, minwidth=0, width=70, anchor='e')
-    accounting_search_treeview.column('#3', stretch=NO, minwidth=0, width=70, anchor='e')
-    accounting_search_treeview.column('#4', stretch=NO, minwidth=0, width=70, anchor='e')
-    accounting_search_treeview.column('#5', stretch=NO, minwidth=0, width=70, anchor='e')
+    accounting_search_treeview.column('#3', stretch=NO, minwidth=0, width=100, anchor='e')
+    accounting_search_treeview.column('#4', stretch=NO, minwidth=0, width=100, anchor='e')
+    accounting_search_treeview.column('#5', stretch=NO, minwidth=0, width=100, anchor='e')
+    accounting_search_treeview.column('#5', stretch=NO, minwidth=0, width=100, anchor='e')
     
 
     accounting_search_treeview.pack()
+    view_journal_entry_treeview()
     
 
 
@@ -1519,7 +1740,9 @@ def dashboard():
     filemenu3.add_command(label="Time In",command=time_in_attendace)
     
     # for report frame menu
+    
     filemenu5.add_command(label="Data per Ministry",command=report_piechart_members_Data)
+    filemenu5.add_command(label="Graph per Date Service",command=graph_attendance)
     filemenu5.add_command(label="BirthDay of The Month",command=birthday_list_frame)
     filemenu5.add_command(label="Attendance per Sunday",command=attendance_list_frame)
     filemenu5.add_command(label="Absent per Sunday",command=absent_members_frame)

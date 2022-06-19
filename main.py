@@ -799,8 +799,57 @@ def testingList():
     
     for i in range(len(arr)) :
         print(arr[i][0])
+
+def groupTest():
+    """
+    This is to test
+    grouping 
+    """
     
-testingList()        
+    dataSearch3 = db['attendance']
+   
+    agg_result = dataSearch3.find()
+
+    subtitle2=[]
+    for i in agg_result:
+        date1 = i['created']
+        # datem = datetime.strptime(date1, "%Y-%m-%d")
+        datem = (date1.strftime('%Y-%m-%d'))
+        subtitle2.append(datem)
+    # res = Counter(subtitle2)
+    result = dict((i, subtitle2.count(i)) for i in subtitle2)
+    keys = result.keys()
+
+    number_of_attendae = result.values()
+    date1 =[]
+    for i in keys:
+        date1.append(i)
+    print(date1)
+    
+    number2 = []
+    for x in number_of_attendae:
+        number2.append(x)
+
+    print(number2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       
+   
+groupTest()
+# testingList()        
 # testing_loop()
 # call_bdy()
 # call_attendance()

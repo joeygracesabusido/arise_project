@@ -1,6 +1,7 @@
 from bson.objectid import ObjectId
 import dateutil.parser
 import pymongo
+from dataclasses import dataclass,field
 
 import certifi
 ca = certifi.where()
@@ -50,36 +51,22 @@ class test_coa:
         b = self.list_coa['category']
        
         return(a+ ' ' + b)
-        
 
-# collection = db['chartOFaccount']
-# query = collection.find()
+    def print_sample(self) :
+        print(self.list_coa['chart_of_account'])
 
-# listCOA = {}
-# Test_list = ''
-# count = 0
-# for i in query:
-    
-#     listCOA.update({len(listCOA)+1:{
-            
-#             'chart_of_account': i['chart_of_account'],
-#             'category': i['category'],
-            
-#         }})
-    # listCOA.update(data)
 
-     
 
-#     Test_list =test_coa(listCOA)  
 
-# Test_list.list_chart_of_account()
+
+@dataclass
 class InsertJournal:
     
-    def __init__(self, date, charofAccount,amount,particular):
-        self.date = date
-        self.charofAccount = charofAccount
-        self.amount = amount
-        self.particular = particular
+    
+    date: str
+    charofAccount: str
+    amount: float
+    particular: str
 
 
     def insert_journal(journal):
@@ -100,9 +87,28 @@ class InsertJournal:
         
         except Exception as ex:
             print("Error", f"Error due to :{str(ex)}")
-            
+
+    def journal_entryList(self):
+        """
+        This is for calling 
+        all the list of journal
+        """
+        pass
+
+# collection = db['journal_entry']  
+# agg_result = collection.find().sort('date', pymongo.ASCENDING)  
+
+# jourNal_entry={}
+# for x in agg_result:
+#     data = {    
+#             'date': x['date'],
+#             'chart_of_account': x['chart_of_account'],
+#             'amount': x['amount'],
+#             'particular': x['particular'],
+                
+#             }
       
-       
+#     jourNal_entry.update(data)   
         
         
 
