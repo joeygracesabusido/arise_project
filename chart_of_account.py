@@ -94,9 +94,13 @@ class InsertJournal:
         all the list of journal
         """
         pass
+    
+    def testingList():
+        """
 
+        """
 # collection = db['journal_entry']  
-# agg_result = collection.find().sort('date', pymongo.ASCENDING)  
+# agg_result = collection.find()  
 
 # jourNal_entry={}
 # for x in agg_result:

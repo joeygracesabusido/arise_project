@@ -31,29 +31,64 @@ db = client.arise_church
 
 
 # p1.insert_chartofAccount()
+from pythonClass import journal_entry
 
-from chart_of_account import test_coa
+def main_data():
+    """
+    this function is for main 
+    data for journal Entry
+    """
+      
+    collection = db['journal_entry']  
+    agg_result = collection.find()  
 
-collection = db['chartOFaccount']
-query = collection.find()
+    
+    jourNal_entry={}
+    for x in agg_result:
+        data = {    
+                'date': x['date'],
+                'chart_of_account': x['chart_of_account'],
+                'amount': x['amount'],
+                'particular': x['particular'],
+                    
+                }
+          
+        jourNal_entry.update(data)
+        global listJournal
+        listJournal = journal_entry(jourNal_entry['date'],
+                                      jourNal_entry['chart_of_account'],
+                                      jourNal_entry['amount'],
+                                      jourNal_entry['particular'])
+        print(listJournal)
 
-listCOA = {}
-Test_list = ''
-count = 0
-for i in query:
+def testing():
+    """This is for 
+    """
+    main_data()
     
    
-    data = {
-            
-            'chart_of_account': i['chart_of_account'],
-            'category': i['category'],
-            
-        }
+
+# collection = db['chartOFaccount']
+# query = collection.find()
+
+# listCOA = {}
+# Test_list = ''
+# count = 0
+# for i in query:
     
-    listCOA.update(data)
+   
+#     data = {
+            
+#             'chart_of_account': i['chart_of_account'],
+#             'category': i['category'],
+            
+#         }
+    
+#     listCOA.update(data)
 
     
-    Test_list =test_coa(listCOA)  
+#     Test_list =test_coa(listCOA)  
 
-    Test_list.print_sample()
+#     Test_list.print_sample()
 
+testing()
