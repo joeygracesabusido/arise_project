@@ -1,6 +1,10 @@
 from dataclasses import dataclass,field
 import pymongo
 import certifi
+
+from typing import List
+
+ 
 ca = certifi.where()
 
 # import registration
@@ -34,17 +38,35 @@ class testCoa:
 
 
 
-@dataclass
-class journal_entry:
+# @dataclass
+# class journal_entry:
     
     
-    date: str
-    charofAccount: str
-    amount: float
-    particular: str
+#     date: str
+#     charofAccount: str
+#     amount: float
+#     particular: str
+
     
-    def __str__(self):
-           return f'{self.date} {self.charofAccount} {self.amount}'
+      
+    
+    # def __str__(self):
+    #        return f'{self.date} {self.charofAccount} {self.amount}'
+
+class list_chartAccount:
+
+  def __init__(self) -> None:
+    # self.chartAccount: List[journal_entry] = []
+    self.chartAccount: str
+
+  # def find_Manager(self) -> List[journal_entry]:
+  #   manager=[]
+  #   for i in self.chartAccount:
+  #     if i.charofAccount == "Tithes Income":
+  #       manager.append(i)
+  #   return manager
+
+
 
 
 
