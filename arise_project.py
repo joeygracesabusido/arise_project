@@ -54,6 +54,8 @@ import numpy as np
 # from chart_of_account import testCoa
 
 
+
+
 from bson.objectid import ObjectId
 import dateutil.parser
 import pymongo
@@ -98,7 +100,15 @@ def clearFrame():
     # this will clear frame and frame will be empty
     # if you want to hide the empty panel then
     MidViewForm9.pack_forget()
-    
+
+# ==========================================Back up Data ===============================================
+def backuData():
+    """
+    This function is for 
+    Back up Data to excel file
+    """  
+    from backup import backup
+    backup()
 #===========================================Report Frame=================================================
 def birthday_list_function():
     """
@@ -1271,7 +1281,7 @@ def delete_membersDetail():
     """
     dataSearch = db['members_detail']
     query = {'members_id':{'$regex':search_input_mReg_entry.get()}}
-    result = tkMessageBox.askquestion('JRS','Are you sure you want to Update?',icon="warning")
+    result = tkMessageBox.askquestion('JRS','Are you sure you want to Delete?',icon="warning")
     if result == 'yes':
         x = dataSearch.delete_one(query)
         messagebox.showinfo('JRS', 'Selected Record has been deleted')
@@ -1728,6 +1738,7 @@ def dashboard():
     filemenu4 = Menu(menubar, tearoff=0)
     filemenu5 = Menu(menubar, tearoff=0)
     filemenu6 = Menu(menubar, tearoff=0)
+    filemenu7 = Menu(menubar, tearoff=0)
 
     filemenu.add_command(label="Logout", command = Logout)
     # filemenu.add_command(label="Exit")
@@ -1747,6 +1758,9 @@ def dashboard():
     filemenu5.add_command(label="Attendance per Sunday",command=attendance_list_frame)
     filemenu5.add_command(label="Absent per Sunday",command=absent_members_frame)
 
+    filemenu7.add_command(label="Back up Data",command=backuData)  
+
+
     # this is for accounting frame
     filemenu4.add_command(label="Insert Chart of Account",command=chart_of_account)
     filemenu4.add_command(label="Journal Entry",command=journal_entry)
@@ -1758,6 +1772,7 @@ def dashboard():
     
     menubar.add_cascade(label="Inventory", menu=filemenu6)
     menubar.add_cascade(label="Reports", menu=filemenu5)
+    menubar.add_cascade(label="Back up", menu=filemenu7)
 
     reportFrame.config(menu=menubar)
 

@@ -16,9 +16,26 @@ class Database(object):
         Database.DATABASE = client.arise_church
         
     @staticmethod
-    def find(collection):
+    def find_all(collection):
         return Database.DATABASE[collection].find()
 
     @staticmethod
     def find_one(collection,query):
+        """
+        This function is
+        querying 
+        """
         return Database.DATABASE[collection].find(query)
+
+    @staticmethod
+    def update_approval(collection, query, newValue):
+        """
+        This function is for updating
+        """
+        return Database.DATABASE[collection].update_many(query, newValue)
+
+    @staticmethod
+
+    def search_members_data_file(collection):
+        return Database.DATABASE[collection].find()
+
