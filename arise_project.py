@@ -108,8 +108,143 @@ def backuData():
     Back up Data to excel file
     """  
     from backup import backup
+    # from membersPiechart import list_churchMinistry
     backup()
+
+    # post = list_churchMinistry()
+    # print(post)
 #===========================================Report Frame=================================================
+def members_attendanceComposition_Function():
+    """
+    This is for function 
+    for attendance Chart
+    """
+    from database import Database
+    Database.initialize()
+
+    
+    date_time_str2 = dateSearch_attendanceChart.get()
+    timeNow = ('00:00:00')
+    # date_time_str3 =date_time_str2 + '' +timeNow
+    # date_time_obj_from = datetime.strptime(date_time_str2, '%Y-%m-%d')
+    date_time_obj = datetime.strptime(date_time_str2, '%Y-%m-%d')
+
+    dateToday1 = dateSearchTo_attendanceChart.get()
+    dateToday = datetime.strptime(dateToday1, '%Y-%m-%d')
+
+
+    data = Database.find_all(collection='church_ministry')# search for all data in church_ministry table
+    
+
+    subtitle=[]
+    for value in data:
+        subtitle.append(value['ministry'])
+
+    
+    search_data2 = Database.find_all(collection='church_ministry')
+    a = ''
+    
+    subtitle2=[]
+    for i in search_data2:
+        a = i['ministry']
+
+        search_data3 = Database.search_count(collection='attendance', 
+                                query={ '$and': [ {'created': {'$gte':date_time_obj,'$lte':dateToday}},
+                                        {'ministry':{
+                                            '$regex': a,
+                                            '$options': 'i' 
+                                            }}
+                                            ] } 
+                                            )
+        subtitle2.append(search_data3)
+    
+    ministry = subtitle
+    
+    data = subtitle2
+
+
+    
+    # Creating explode data
+    explode = (0.1, 0.0)
+    
+    # Creating color parameters
+    colors = ( "orange", "cyan","blue","yellow",
+                "green","brown","red")
+    
+    # Wedge properties
+    wp = { 'linewidth' : 1, 'edgecolor' : "green" }
+    
+    # Creating autocpt arguments
+    def func(pct, allvalues):
+        absolute = int(pct / 100.*np.sum(allvalues))
+        return "{:.1f}%\n({:d} g)".format(pct, absolute)
+    
+    # Creating plot
+    fig, ax = plt.subplots(figsize =(8, 5))
+    wedges, texts, autotexts = ax.pie(data,
+                                    autopct = lambda pct: func(pct, data),
+                                    
+                                    labels = ministry,
+                                    shadow = True,
+                                    colors = colors,
+                                    startangle = 90,
+                                    wedgeprops = wp,
+                                    textprops = dict(color ="black"))
+    
+    # Adding legend
+    ax.legend(wedges, ministry,
+            title ="Ministry",
+            loc ="center left",
+            bbox_to_anchor =(1, 0, 0.5, 1))
+    
+    plt.setp(autotexts, size = 10, weight ="bold")
+    ax.set_title("Arise Church Attendance's Data Chart")
+    
+    # show plot
+    plt.show()
+
+
+def members_attendanceComposition_frame():
+    """
+    This function is for 
+    chart of attendance
+    """
+    chart_attendaceChartframe = Frame(MidViewForm9, width=950, height=400, bd=2, bg='gray', relief=SOLID)
+    chart_attendaceChartframe.place(x=20, y=8)
+
+
+    absent_date_label = Label(chart_attendaceChartframe, text='From',
+                        width=13, height=1, bg='yellow', fg='black',
+                        font=('Arial', 10), anchor='center')
+    absent_date_label.place(x=150, y=30)
+
+
+
+    global dateSearch_attendanceChart
+    dateSearch_attendanceChart = DateEntry(chart_attendaceChartframe, width=15, background='darkblue',
+                                  date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    dateSearch_attendanceChart.place(x=270, y=30)
+    dateSearch_attendanceChart.configure(justify='center')
+
+    absent_date_label_to = Label(chart_attendaceChartframe, text='From',
+                        width=13, height=1, bg='yellow', fg='black',
+                        font=('Arial', 10), anchor='center')
+    absent_date_label_to.place(x=400, y=30)
+
+    global dateSearchTo_attendanceChart
+    dateSearchTo_attendanceChart = DateEntry(chart_attendaceChartframe, width=15, background='darkblue',
+                                  date_pattern='yyyy-MM-dd',
+                                  foreground='white', borderwidth=2, padx=10, pady=10)
+    dateSearchTo_attendanceChart.place(x=530, y=30)
+    dateSearchTo_attendanceChart.configure(justify='center')
+
+    btn_search_attendanceChart = Button(chart_attendaceChartframe, text='Search', bd=2, bg='blue', fg='white',
+                              font=('arial', 10), width=7, height=1,
+                              command=members_attendanceComposition_Function)
+    btn_search_attendanceChart.place(x=650, y=30)
+    btn_search_attendanceChart.bind('<Return>', members_attendanceComposition_Function)
+
 def birthday_list_function():
     """
     This function is
@@ -337,7 +472,12 @@ def graph_attendance():
     plt.show()
 
 
-    
+def membersAttendance_pieChart():
+    """
+    This function is for
+    pie chart of members Attendance
+    """
+
     
 
 
@@ -370,9 +510,7 @@ def report_piechart_members_Data():
         search_data3= dataSearch3.count_documents({'ministry':a})
         subtitle2.append(search_data3)
     
-    # Creating dataset
-    # cars = ['AUDI', 'BMW', 'FORD',
-    #         'TESLA', 'JAGUAR', 'MERCEDES']
+    
 
     cars = subtitle
     
@@ -405,7 +543,7 @@ def report_piechart_members_Data():
                                     colors = colors,
                                     startangle = 90,
                                     wedgeprops = wp,
-                                    textprops = dict(color ="magenta"))
+                                    textprops = dict(color ="black"))
     
     # Adding legend
     ax.legend(wedges, cars,
@@ -1754,6 +1892,7 @@ def dashboard():
     
     filemenu5.add_command(label="Data per Ministry",command=report_piechart_members_Data)
     filemenu5.add_command(label="Graph per Date Service",command=graph_attendance)
+    filemenu5.add_command(label="Attendance Chart",command=members_attendanceComposition_frame)
     filemenu5.add_command(label="BirthDay of The Month",command=birthday_list_frame)
     filemenu5.add_command(label="Attendance per Sunday",command=attendance_list_frame)
     filemenu5.add_command(label="Absent per Sunday",command=absent_members_frame)

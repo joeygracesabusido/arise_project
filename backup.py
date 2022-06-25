@@ -1,4 +1,4 @@
-from sample import Database
+from database import Database
 import xlsxwriter
 from os import startfile
 

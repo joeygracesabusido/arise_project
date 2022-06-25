@@ -35,7 +35,10 @@ class Database(object):
         return Database.DATABASE[collection].update_many(query, newValue)
 
     @staticmethod
-
     def search_members_data_file(collection):
         return Database.DATABASE[collection].find()
+
+    @staticmethod
+    def search_count(collection,query):
+        return Database.DATABASE[collection].count_documents(query)
 
