@@ -628,7 +628,7 @@ def attendance_list_btn():
         membersList_attendance_treeview.insert('', 'end', values=(members['count'],members['members_id'],members['lname'],
                                 members['fname'],members['ministry']))
 
-        perMinistryAttendance()
+        # perMinistryAttendance()
 def attendance_list():
     """
     This function is for

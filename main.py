@@ -832,6 +832,22 @@ def groupTest():
 
     print(number2)
 
+def delete_attendance():
+    """
+    This is to delete 
+    Attendance
+    """
+    dataSearch = db['attendance']
+    search_data = dataSearch.find()
+
+    for i in search_data:
+        date1 = i['created']
+        members_id = i['members_id']
+        lname = i['lname']
+        fname = i ['fname']
+        print(date1,members_id,lname,fname)
+
+delete_attendance()
 
 
 
@@ -848,7 +864,7 @@ def groupTest():
 
        
    
-groupTest()
+# groupTest()
 # testingList()        
 # testing_loop()
 # call_bdy()
